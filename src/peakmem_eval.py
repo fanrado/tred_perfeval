@@ -12,9 +12,9 @@ def organize_peakmem_data(data: dict):
 		event_ids, N_segments, N_qblock, peak_memory
 	"""
 	organized_data = {}
-	batch_size = data.get('batch_size', None)
-	nbchunk = data.get('nbchunk', None)
-	nbchunk_conv = data.get('nbchunk_conv', None)
+	batch_size = data['batch_size']
+	nbchunk = data['nbchunk']
+	nbchunk_conv = data['nbchunk_conv']
 	del data['batch_size']
 	del data['nbchunk']
 	del data['nbchunk_conv']
@@ -41,10 +41,10 @@ def organize_peakmem_data(data: dict):
 	organized_data['event_ids'] 				= event_ids
 	organized_data['N_segments'] 				= N_segments
 	organized_data['N_qblocks'] 				= N_qblocks
-	organized_data['peak_memory_perbatch'] 	= peak_memory_perbatch
+	organized_data['peak_memory_perbatch'] 		= peak_memory_perbatch
 	organized_data['batch_size'] 				= batch_size
-	organized_data['nbchunk'] 				= nbchunk
-	organized_data['nbchunk_conv'] 			= nbchunk_conv
+	organized_data['nbchunk'] 					= nbchunk
+	organized_data['nbchunk_conv'] 				= nbchunk_conv
 	return organized_data
 
 def plot_peakmem_vs_nsegs(n_segments, peak_memory, title):
