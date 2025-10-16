@@ -135,14 +135,57 @@ def get_runtime_majorOperations(data: dict):
 	organized_data['batch_size'] 					= batch_size
 	organized_data['nbchunk'] 						= nbchunk
 	organized_data['nbchunk_conv'] 					= nbchunk_conv
+	#
 	organized_data['recombination'] 				= recombination
 	organized_data['drift'] 						= drift
 	organized_data['chunking_conv'] 				= chunking_conv
+	## Recall. This is needed especially for the function runtimeshare_majorOp below.
+	# chunking_conv 		= {
+	# 	'rasterize' 		: [],
+	# 	'chunksum_qblock' 	: [],
+	# 	'conv_conv'			: [],
+	# 	'conv_chunksum_i'	: [],
+	# 	'sumcurrent'		: []
+	# }
 	organized_data['sum_current'] 					= sum_current
 	organized_data['chunksum_readout'] 				= chunksum_readout
 	organized_data['concat_readout'] 				= concat_readout
 	organized_data['formingBlock_readout_current'] 	= formingBlock_readout_current
 	return organized_data
+
+def runtimeshare_majorOp(organized_data: dict, output_file=''):
+	"""
+		This function generate a piechart of the runtime share of major operations.
+		Args:
+			organized_data (dict): output of get_runtime_majorOperations function.
+			output_file (str): output file name for the pie chart.
+		Major operations:
+			-- Electronic readout: prepare wf i/io (not here because we don't touch anything related to output wf here)
+			                      + chunksum readout
+								  + concat readout
+								  + formingBlock readout current
+			-- Induced current calculation: conv_chunksum_i + conv_conv + sumcurrent + sum_current (current accumulations)
+			-- Rasterization of ionization charges: chunksum_qblock + rasterize
+			-- Recombination, attenuation, and drift: recombination + drift
+	"""
+	Electronic_readout = np.sum(organized_data['chunksum_readout']) + np.sum(organized_data['concat_readout']) + np.sum(organized_data['formingBlock_readout_current'])
+	Induced_current_calculation = np.sum( organized_data['chunking_conv']['conv_chunksum_i'] ) + np.sum( organized_data['chunking_conv']['conv_conv'] ) + np.sum( organized_data['chunking_conv']['sumcurrent'] ) + np.sum( organized_data['sum_current'] )
+	Rasterization_of_ionization_charges = np.sum( organized_data['chunking_conv']['chunksum_qblock'] ) + np.sum( organized_data['chunking_conv']['rasterize'] )
+	Recombination_attenuation_and_drift = np.sum( organized_data['recombination'] ) + np.sum( organized_data['drift'] )
+
+	labels = ['Electronic readout', 'Induced current calculation', 'Rasterization of ionization charges', 'Recombination, attenuation, and drift']
+	sizes = [Electronic_readout, Induced_current_calculation, Rasterization_of_ionization_charges, Recombination_attenuation_and_drift]
+	colors = ['#ff9999','#66b3ff','#99ff99','#ffcc99']
+	explode = (0.05, 0.05, 0.05, 0.05)  # explode all slices slightly
+	wedges, texts, autotexts = plt.pie(sizes, explode=explode, labels=None, colors=colors, autopct='%1.1f%%',
+                shadow=True, startangle=140)
+	plt.title('Runtime Distribution of Major Operations', fontsize=16)
+	plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle
+	plt.legend(wedges, labels, title="Operations", loc="upper right", bbox_to_anchor=(1.0, 1.0))
+	plt.tight_layout()
+	plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+	plt.savefig(output_file)
+	plt.close()
 
 if __name__=='__main__':
 	pass
