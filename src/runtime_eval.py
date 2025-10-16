@@ -112,26 +112,26 @@ def get_runtime_majorOperations(data: dict):
 				continue
 			for key, value in batch_data.items():
 				# replace _MB with _sec
-				each_operation_runtime = value['each_operation_MB'] ## replace each_operation_MB with each_operation_sec once the data is ready
-				recombination.append(each_operation_runtime['recomb_MB'])
-				drift.append(each_operation_runtime['drifter_MB'])
-				sum_current.append(each_operation_runtime['sum_current_MB'])
-				chunksum_readout.append(each_operation_runtime['chunksum_readout_MB'])
-				concat_readout.append(each_operation_runtime['concat_readout_MB'])
-				formingBlock_readout_current.append(each_operation_runtime['formingBlock_readout_current_MB'])
+				each_operation_runtime = value['each_operation_sec'] ## replace each_operation_MB with each_operation_sec once the data is ready
+				recombination.append(each_operation_runtime['recomb_sec'])
+				drift.append(each_operation_runtime['drifter_sec'])
+				sum_current.append(each_operation_runtime['sum_current_sec'])
+				chunksum_readout.append(each_operation_runtime['chunksum_readout_sec'])
+				concat_readout.append(each_operation_runtime['concat_readout_sec'])
+				formingBlock_readout_current.append(each_operation_runtime['formingBlock_readout_current_sec'])
 				chunking_conv_data = each_operation_runtime['chunking_conv']
 				for ichunk, chunkdata in chunking_conv_data.items():
-					chunking_conv['rasterize'].append(chunkdata['raster_MB'])
-					chunking_conv['chunksum_qblock'].append(chunkdata['chunksum_qblock_MB'])
-					chunking_conv['sumcurrent'].append(chunkdata['sumcurrent_MB'])
-					conv_data = chunkdata['conv_MB']
+					chunking_conv['rasterize'].append(chunkdata['raster_sec'])
+					chunking_conv['chunksum_qblock'].append(chunkdata['chunksum_qblock_sec'])
+					chunking_conv['sumcurrent'].append(chunkdata['sumcurrent_sec'])
+					conv_data = chunkdata['conv_sec']
 					for keyconv, valconv in conv_data.items():
 						if not isinstance(valconv, dict):
 							continue
 						## Convolution level
 						for key1, value1 in valconv.items():
-							chunking_conv['conv_conv'].append(value1['conv_MB'])
-							chunking_conv['conv_chunksum_i'].append(value1['chunksum_i_MB'])
+							chunking_conv['conv_conv'].append(value1['conv_time'])
+							chunking_conv['conv_chunksum_i'].append(value1['chunksum_i_time'])
 	organized_data['batch_size'] 					= batch_size
 	organized_data['nbchunk'] 						= nbchunk
 	organized_data['nbchunk_conv'] 					= nbchunk_conv
