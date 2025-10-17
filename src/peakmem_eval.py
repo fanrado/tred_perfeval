@@ -1,4 +1,4 @@
-import os, sys
+import os, sys, json
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -87,6 +87,35 @@ def overlay_plots(*args, title='', xlabel='', ylabel='', output_file='overlay_pl
 	plt.grid(True)
 	plt.savefig(output_file)
 	plt.close()
+
+def load_json(file_path: str):
+	"""
+	Load JSON data from a file.
+
+	Args:
+		file_path (str): Path to the JSON file.
+	Returns:
+		dict: Loaded JSON data.
+	"""
+	with open(file_path, 'r') as f:
+		data = json.load(f)
+	return data
+
+def benchmark_peak_memory_nodynamic_chunking_and_batching(input_path: str):
+	"""
+	Benchmark peak memory usage without dynamic chunking and batching.
+	"""
+	list_of_files = [f for f in os.listdir(input_path) if f.endswith('.json')]
+	list_of_tuple_data = []
+	for f in list_of_files:
+		file_path = '/'.join([input_path, f])
+		f_split = f.split('.')[0].split('_')[3:]
+		label = f'Batch size: {f_split[0].replace("batch","")}, nbchunk: {f_split[1].replace("nbchunk","")}, nbchunk_conv: {f_split[2].replace("nbchunkconv","")}'
+		data = load_json(file_path)
+		organized_data = organize_peakmem_data(data=data)
+		tuple_data = (organized_data['N_segments'], organized_data['peak_memory_perbatch'], label, np.random.rand(3,))
+		list_of_tuple_data.append(tuple_data)
+	overlay_plots(*list_of_tuple_data, title='Peak memory vs N_segments (No Dynamic Chunking and Batching)', xlabel='N_segments', ylabel='Peak Memory (MB)', output_file='/'.join([input_path, 'peakmem_vs_Nsegments_nodynamic_chunking_batching.png']))
 
 if __name__=='__main__':
 	pass
