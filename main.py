@@ -4,10 +4,11 @@ import os, sys, json
 import src.peakmem_eval as peakmem_eval
 import src.runtime_eval as runtime_eval
 
-input_dir = '/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/MEMORY_EVAL'
+# input_dir = '/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/MEMORY_EVAL/no_dynBatchChunk/benchmark_plot'
+input_dir = '/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/MEMORY_EVAL/with_dynBatchChunk/benchmark_mem'
 # input_subdir = 'runon_wcgpu1'
 input_subdir = ''
-filename = 'peak_memory_usage_batch2048_nbchunk100_nbchunkconv50.json'
+filename = 'peak_memory_usage_withdynamic_batching_chunking.json'
 input_file = '/'.join([input_dir, input_subdir, filename])
 
 def load_json(input_file=''):
@@ -16,7 +17,8 @@ def load_json(input_file=''):
 	return data
 
 if __name__=='__main__':
-	peakmem_eval.benchmark_peak_memory_nodynamic_chunking_and_batching(input_path=input_dir)
+	# peakmem_eval.benchmark_peak_memory_nodynamic_chunking_and_batching(input_path=input_dir)
+	peakmem_eval.benchmark_peak_memory_dynamic_chunking_and_batching(input_path=input_dir)
 	# print(input_dir)
 	# data = load_json(input_file=input_file)
 	# organized_data = peakmem_eval.organize_peakmem_data(data=data)
