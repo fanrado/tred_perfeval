@@ -1,4 +1,4 @@
-import os, sys
+import os, sys, json
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -45,9 +45,9 @@ def get_runtime_perbatch(data: dict):
 	organized_data['nbchunk_conv'] 		= nbchunk_conv
 	return organized_data
 
-def overlay_plots(data_tuple, title, xlabel, ylabel,output_file=''):
+def overlay_plots(*args, title, xlabel, ylabel,output_file=''):
 	plt.figure(figsize=(10, 6))
-	for (x_data, y_data, label, color) in data_tuple:
+	for (x_data, y_data, label, color) in args:
 		plt.scatter(x_data, y_data, label=label, color=color, alpha=0.7)
 	plt.title(title)
 	plt.xlabel(xlabel)
@@ -56,6 +56,29 @@ def overlay_plots(data_tuple, title, xlabel, ylabel,output_file=''):
 	plt.grid(True)
 	plt.savefig(output_file)
 	plt.close()
+
+def load_json(input_file=''):
+	with open(input_file, 'r') as f:
+		data = json.load(f)
+	return data
+
+def benchmark_runtime(input_path: str):
+	"""
+		Benchmark runtime evaluation from the input path.
+	"""
+	list_files 				= [f for f in os.listdir(input_path) if f.endswith('.json')]
+	list_tuples 			= []
+	colors 					= ['red', 'green', 'black', 'purple', 'yellow', 'maroon']
+	for i, f in enumerate(list_files):
+		file_path = '/'.join([input_path, f])
+		f_split = f.split('.')[0].split('_')[3:]
+		data = load_json(file_path)
+		organized_data 	 	= get_runtime_perbatch(data=data)
+		label 				= f'Batch size: {organized_data["batch_size"]}, \nnbchunk: {organized_data["nbchunk"]}, nbchunk_conv: {organized_data["nbchunk_conv"]}'
+		tuple_data 			= (organized_data['N_segments'], organized_data['runtimes_perbatch'], label, colors[i])
+		list_tuples.append(tuple_data)
+	output_file = '/'.join([input_path, 'runtime_vs_Nsegments.png'])
+	overlay_plots(*list_tuples, title='Runtime vs N_segments', xlabel='N segments', ylabel='Runtime (sec)', output_file=output_file)
 
 def get_runtime_majorOperations(data: dict):
 	"""
@@ -177,8 +200,9 @@ def runtimeshare_majorOp(organized_data: dict, output_file=''):
 	sizes = [Electronic_readout, Induced_current_calculation, Rasterization_of_ionization_charges, Recombination_attenuation_and_drift]
 	colors = ['#ff9999','#66b3ff','#99ff99','#ffcc99']
 	explode = (0.05, 0.05, 0.05, 0.05)  # explode all slices slightly
+	plt.figure(figsize=(8, 8))
 	wedges, texts, autotexts = plt.pie(sizes, explode=explode, labels=None, colors=colors, autopct='%1.1f%%',
-                shadow=True, startangle=140)
+                shadow=True, startangle=140, pctdistance=1.1)
 	plt.title('Runtime Distribution of Major Operations', fontsize=16)
 	plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle
 	plt.legend(wedges, labels, title="Operations", loc="upper right", bbox_to_anchor=(1.0, 1.0))
