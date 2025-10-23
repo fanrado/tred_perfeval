@@ -2,6 +2,7 @@ import os, sys, json
 import numpy as np
 import numpy.lib.recfunctions as rfn
 import matplotlib.pyplot as plt
+import h5py
 
 def load_npz(input_file=''):
 	"""
@@ -29,7 +30,7 @@ def load_npz(input_file=''):
 	
 	all_tpc_data = {}
 	for itpc in range(70):
-		# if itpc!=0:
+		# if itpc > 3:
 		# 	continue
 		tpc_key = f'tpc{itpc}'
 		tmp_tpc_data = {
@@ -67,17 +68,19 @@ def get_all_pixels_locations(data_tpc, ref_data_tpc):
 	return pix_locs
 
 
-def get_deltaQ(npz_data, npz_ref):
+def get_deltaQ_fromNPZ(npz_data, npz_ref, saveHDF5=False, output_hdf5=''):
 	data = load_npz(input_file=npz_data)
 	ref_data = load_npz(input_file=npz_ref)
 
 	deltaQ_allTPCs = {f'tpc{i}': None for i in range(70)}  # Only first 3 TPCs for now
+	dQ_over_Q_allTPCs = {f'tpc{i}': None for i in range(70)}  # Only first 3 TPCs for now
 	for itpc in deltaQ_allTPCs.keys():
 		print('Processing ', itpc)
 		data_tpc = data[itpc]
 		ref_data_tpc = ref_data[itpc]
 		pix_locs_array = get_all_pixels_locations(data_tpc, ref_data_tpc)
 		deltaQ = np.array([], dtype=np.float32)
+		dQ_over_Q = np.array([], dtype=np.float32)
 		for pix_loc in pix_locs_array:
 			locs_in_data = np.where(np.all(data_tpc['pixels_locations']==pix_loc, axis=1))[0]
 			locs_in_ref = np.where(np.all(ref_data_tpc['pixels_locations']==pix_loc, axis=1))[0]
@@ -87,41 +90,46 @@ def get_deltaQ(npz_data, npz_ref):
 			if len(locs_in_ref)==0:
 				tmp_charge = np.array([(pix_loc, 0.0)], dtype=ref_data_tpc.dtype)
 				ref_data_tpc = rfn.stack_arrays((ref_data_tpc, tmp_charge), usemask=False)
-			
-			# if len(locs_in_data)-len(locs_in_ref) > 1:
-			# 	N = len(locs_in_data) - len(locs_in_ref)
-			# 	tmp_charge = np.array([], dtype=ref_data_tpc.dtype)
-			# 	for i in range(N):
-			# 		tmp_pix_charge = np.array([(pix_loc, 0.0)], dtype=ref_data_tpc.dtype)
-			# 		if i==0:
-			# 			tmp_charge = tmp_pix_charge
-			# 		else:
-			# 			tmp_charge = rfn.stack_arrays((tmp_charge, tmp_pix_charge), usemask=False)
-			# 	print(tmp_charge)
-			# 	ref_data_tpc = rfn.stack_arrays((ref_data_tpc, tmp_charge), usemask=False)
-			# elif len(locs_in_ref)-len(locs_in_data) > 1:
-			# 	N = len(locs_in_ref) - len(locs_in_data)
-			# 	tmp_charge = np.array([], dtype=data_tpc.dtype)
-			# 	for i in range(N):
-			# 		tmp_pix_charge = np.array([(pix_loc, 0.0)], dtype=data_tpc.dtype)
-			# 		if i==0:
-			# 			tmp_charge = tmp_pix_charge
-			# 		else:
-			# 			tmp_charge = rfn.stack_arrays((tmp_charge, tmp_pix_charge), usemask=False)
-			# 	print(tmp_charge)
-			# 	data_tpc = rfn.stack_arrays((data_tpc, tmp_charge), usemask=False)
+		
 			locs_in_data = np.where(np.all(data_tpc['pixels_locations']==pix_loc, axis=1))[0]
 			locs_in_ref = np.where(np.all(ref_data_tpc['pixels_locations']==pix_loc, axis=1))[0]
 			charge_in_ref = np.sum(ref_data_tpc['accumulated_charge'][locs_in_ref])
 			charge_in_data = np.sum(data_tpc['accumulated_charge'][locs_in_data])
 			deltaQ = np.concatenate((deltaQ, [charge_in_data - charge_in_ref]))
-
+			if charge_in_ref > 1e-9:
+				dQ_over_Q = np.concatenate((dQ_over_Q, [(charge_in_data - charge_in_ref)/charge_in_ref]))
+				
+		# print(dQ_over_Q)
 		deltaQ_allTPCs[itpc] = deltaQ
+		dQ_over_Q_allTPCs[itpc] = dQ_over_Q
 	# print(deltaQ_allTPCs)
+	if saveHDF5:
+		with h5py.File(output_hdf5, 'w') as f:
+			for itpc in deltaQ_allTPCs.keys():
+				print(type(deltaQ_allTPCs[itpc]))
+				f.create_dataset(f'{itpc}/deltaQ', data=deltaQ_allTPCs[itpc])
+				f.create_dataset(f'{itpc}/dQ_over_Q', data=dQ_over_Q_allTPCs[itpc])
 
-	return deltaQ_allTPCs
+	return deltaQ_allTPCs, dQ_over_Q_allTPCs
 
-def overlay_hists_deltaQ(*deltaQ_list, title, xlabel, ylabel, output_file=''):
+def load_deltaQ_fromHDF5(hdf5_file=''):
+	"""
+		Load deltaQ and dQ_over_Q from an HDF5 file.
+		Args:
+			hdf5_file (str): Path to the HDF5 file.
+		Returns:
+			deltaQ_allTPCs (dict): Dictionary of deltaQ arrays per TPC.
+			dQ_over_Q_allTPCs (dict): Dictionary of dQ_over_Q arrays per TPC.
+	"""
+	deltaQ_allTPCs = {}
+	dQ_over_Q_allTPCs = {}
+	with h5py.File(hdf5_file, 'r') as f:
+		for itpc in f.keys():
+			deltaQ_allTPCs[itpc] = f[f'{itpc}/deltaQ'][:]
+			dQ_over_Q_allTPCs[itpc] = f[f'{itpc}/dQ_over_Q'][:]
+	return deltaQ_allTPCs, dQ_over_Q_allTPCs
+
+def overlay_hists_deltaQ(*deltaQ_list, title, xlabel, ylabel, output_file='', cut=None):
 	"""
 		Overlay the distributions of the deltaQ = data - ref.
 		Args:
@@ -137,9 +145,11 @@ def overlay_hists_deltaQ(*deltaQ_list, title, xlabel, ylabel, output_file=''):
 		all_tpcs_deltaQ = np.array([], dtype=np.float32)
 		for itpc in deltaQ.keys():
 			all_tpcs_deltaQ = np.concatenate((all_tpcs_deltaQ, deltaQ[itpc]), axis=0)
+		mask = all_tpcs_deltaQ < cut if cut is not None else np.ones_like(all_tpcs_deltaQ, dtype=bool)
+	
 		## plot the distribution of all accumulated charges
 		# plt.hist(deltaQ, bins=100, histtype='step', color=color, label=label)
-		plt.hist(all_tpcs_deltaQ, bins=100, histtype='step', color=color, label=label)
+		plt.hist(all_tpcs_deltaQ[mask], bins=100, histtype='step', color=color, label=label)
 		# ax[1].hist(all_tpcs_deltaQ, bins=100, histtype='step', color=color, label=label)
 		# plt.hist(deltaQ, bins=100, range=(-1000, 1000), histtype='step', color=color, label=label)
 	plt.xlabel(xlabel, fontsize=18)
