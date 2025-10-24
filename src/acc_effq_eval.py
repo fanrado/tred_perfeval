@@ -303,11 +303,15 @@ def load_Q_fromHDF5(hdf5_file='', cut_on_Qref=1): # ke-
 			Npix_total += len(all_Qref[~mask_nocharge]) # total number of pixels
 			Npix_below_thr += np.sum(all_Qref[~mask_nocharge] < cut_on_Qref) # total number of pixels below threshold
 			for i in range(len(all_Qref)):
-				if all_Qref[i] < cut_on_Qref:
-					continue
 				charge_in_data = f[f'{itpc}/Q'][:][i]
 				charge_in_ref = all_Qref[i]
 				deltaQ_allTPCs[itpc].append(charge_in_data - charge_in_ref)
+				if all_Qref[i] < cut_on_Qref:
+					continue
+				## calculating deltaQ after the cut on Q_ref results in a non-symmetric distribution
+				# charge_in_data = f[f'{itpc}/Q'][:][i]
+				# charge_in_ref = all_Qref[i]
+				# deltaQ_allTPCs[itpc].append(charge_in_data - charge_in_ref)
 				dQ_over_Q_allTPCs[itpc].append((charge_in_data - charge_in_ref) / charge_in_ref)
 			deltaQ_allTPCs[itpc] = np.array(deltaQ_allTPCs[itpc], dtype=np.float32)
 			dQ_over_Q_allTPCs[itpc] = np.array(dQ_over_Q_allTPCs[itpc], dtype=np.float32)
