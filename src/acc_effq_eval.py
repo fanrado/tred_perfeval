@@ -279,8 +279,8 @@ def load_Q_fromHDF5(hdf5_file='', cut_on_Qref=1): # ke-
 			Q_allTPCs (dict): Dictionary of Q arrays per TPC.
 			Qref_allTPCs (dict): Dictionary of Q_ref arrays per TPC.
 	"""
-	# Q_allTPCs = {}
-	# Qref_allTPCs = {}
+	Q_allTPCs = {}
+	Qref_allTPCs = {}
 	deltaQ_allTPCs = {}
 	dQ_over_Q_allTPCs = {}
 	Npix_total = 0
@@ -289,6 +289,9 @@ def load_Q_fromHDF5(hdf5_file='', cut_on_Qref=1): # ke-
 		tpc_keys = [key for key in f.keys() if key.startswith('tpc')]
 		for itpc in tpc_keys:
 			all_Qref = f[f'{itpc}/Q_ref'][:]
+			all_Q = f[f'{itpc}/Q'][:]
+			Qref_allTPCs[itpc] = all_Qref
+			Q_allTPCs[itpc] = all_Q
 			# mask = all_Qref >= cut_on_Qref # only consider pixels where Q_ref is above the threshold
 			# mask_nocharge = all_Qref == 0.0
 			# Npix_total += len(all_Qref[~mask_nocharge]) # total number of pixels
@@ -303,7 +306,8 @@ def load_Q_fromHDF5(hdf5_file='', cut_on_Qref=1): # ke-
 			Npix_total += len(all_Qref[~mask_nocharge]) # total number of pixels
 			Npix_below_thr += np.sum(all_Qref[~mask_nocharge] < cut_on_Qref) # total number of pixels below threshold
 			for i in range(len(all_Qref)):
-				charge_in_data = f[f'{itpc}/Q'][:][i]
+				# charge_in_data = f[f'{itpc}/Q'][:][i]
+				charge_in_data = all_Q[i]
 				charge_in_ref = all_Qref[i]
 				deltaQ_allTPCs[itpc].append(charge_in_data - charge_in_ref)
 				if all_Qref[i] < cut_on_Qref:
@@ -315,6 +319,12 @@ def load_Q_fromHDF5(hdf5_file='', cut_on_Qref=1): # ke-
 				dQ_over_Q_allTPCs[itpc].append((charge_in_data - charge_in_ref) / charge_in_ref)
 			deltaQ_allTPCs[itpc] = np.array(deltaQ_allTPCs[itpc], dtype=np.float32)
 			dQ_over_Q_allTPCs[itpc] = np.array(dQ_over_Q_allTPCs[itpc], dtype=np.float32)
+	plot_dist = False
+	if plot_dist:
+		title = hdf5_file.split('/')[-1].replace('.hdf5', '')
+		list_Q = [(Q_allTPCs, 'Q', 'blue'), (Qref_allTPCs, r'$Q_{ref}$', 'orange')]
+		output_file = hdf5_file.replace('.hdf5', '_Q_distribution.png')
+		overlay_hists_deltaQ(*list_Q, title=title, xlabel='Accumulated Charge [ke-]', ylabel='Counts', output_file=output_file)
 	return deltaQ_allTPCs, dQ_over_Q_allTPCs, Npix_total, Npix_below_thr
 	# return Q_allTPCs, Qref_allTPCs
 	
