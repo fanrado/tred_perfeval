@@ -42,10 +42,11 @@ if __name__=='__main__':
 	readFrom_npz = False
 	cut_on_Q = 1 # ke-
 	if readFrom_npz:
-		path_to_ref = '/'.join([root_path, '10x10_partitions_2x2x2.npz'])
-		path_to_10x10_4x4x2 = '/'.join([root_path, '10x10_partitions_4x4x2.npz'])
-		path_to_8x8_2x2x2 = '/'.join([root_path, '8x8_partitions_2x2x2.npz'])
-		path_to_6x6_2x2x2 = '/'.join([root_path, '6x6_partitions_2x2x2.npz'])
+		path_to_ref = '/'.join([root_path, 'npz/10x10_partitions_2x2x2.npz'])
+		# path_to_ref = '/'.join([root_path, '9x9_debug/MicroProdN1p1_NDLAr_1E18_RHC_event1003_9x9FR.npz'])
+		path_to_10x10_4x4x2 = '/'.join([root_path, 'npz/10x10_partitions_4x4x2.npz'])
+		path_to_8x8_2x2x2 = '/'.join([root_path, 'npz/8x8_partitions_2x2x2.npz'])
+		path_to_6x6_2x2x2 = '/'.join([root_path, 'npz/6x6_partitions_2x2x2.npz'])
 
 		output_file_10x10_hdf5 = '/'.join([root_path, 'HDF5/accumulatedcharge_10x10_4x4x2.hdf5'])
 		output_file_8x8_hdf5 = '/'.join([root_path, 'HDF5/accumulatedcharge_8x8_2x2x2.hdf5'])
