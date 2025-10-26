@@ -40,6 +40,7 @@ def load_npz(input_file='', cut_on_Q=1): #ke-
 		}
 
 		for i, key in enumerate(tpcs_keys[tpc_key]):
+			print(key)
 			acc_charge = np.sum(data[key], axis=-1).reshape(-1) # sum over the last axis to get the accumulated charge per pixel
 			mask = acc_charge >= cut_on_Q
 			# acc_charge = acc_charge[mask]
@@ -73,21 +74,23 @@ def get_all_pixels_locations(data_tpc, ref_data_tpc):
 	return pix_locs
 
 def npz2hdf5(npz_data, npz_ref, saveHDF5=False, output_hdf5=''):
-	data = load_npz(input_file=npz_data, cut_on_Q=1e-12)
 	ref_data = load_npz(input_file=npz_ref, cut_on_Q=1e-12)
+	data = load_npz(input_file=npz_data, cut_on_Q=1e-12)
 
 	Ntpcs = 70
 	# deltaQ_allTPCs = {f'tpc{i}': None for i in range(Ntpcs)}  # Only first 3 TPCs for now
 	# dQ_over_Q_allTPCs = {f'tpc{i}': None for i in range(Ntpcs)}  # Only first 3 TPCs for now
 	# saving Q_allTPCs, Qref_allTPCs, pixLocs_allTPCs, pixLocs_ref_allTPCs
 	## all charges are above the threshold
-	Q_allTPCs = {f'tpc{i}': None for i in range(Ntpcs)}
-	Qref_allTPCs = {f'tpc{i}': None for i in range(Ntpcs)}
-	pixLocs_allTPCs = {f'tpc{i}': None for i in range(Ntpcs)}
-	pixLocs_ref_allTPCs = {f'tpc{i}': None for i in range(Ntpcs)}
+	# Q_allTPCs = {f'tpc{i}': None for i in range(Ntpcs)}
+	# Qref_allTPCs = {f'tpc{i}': None for i in range(Ntpcs)}
+	# pixLocs_allTPCs = {f'tpc{i}': None for i in range(Ntpcs)}
+	# pixLocs_ref_allTPCs = {f'tpc{i}': None for i in range(Ntpcs)}
+	all_tpc_data = {f'tpc{i}': None for i in range(Ntpcs)}
 	# Npix = 0 # total number of pixels
 	# Npix_below_thr = 0 # total number of pixels below threshold
-	for itpc in Q_allTPCs.keys():
+	# for itpc in Q_allTPCs.keys():
+	for itpc in all_tpc_data.keys():
 		print('Processing ', itpc)
 		data_tpc = data[itpc]
 		ref_data_tpc = ref_data[itpc]
@@ -105,6 +108,11 @@ def npz2hdf5(npz_data, npz_ref, saveHDF5=False, output_hdf5=''):
 		for pix_loc in pix_locs_array:
 			locs_in_data = np.where(np.all(data_tpc['pixels_locations']==pix_loc, axis=1))[0]
 			locs_in_ref = np.where(np.all(ref_data_tpc['pixels_locations']==pix_loc, axis=1))[0]
+			if len(ref_data_tpc['accumulated_charge'][locs_in_ref]) > 1:
+				print('Filename : ', npz_ref.split('/')[-1])
+				print(f'{len(ref_data_tpc['accumulated_charge'][locs_in_ref])} duplicate locations.')
+				print(f'{ref_data_tpc['pixels_locations'][locs_in_ref]}')
+				print('Charges on the duplicate locations: ', ref_data_tpc['accumulated_charge'][locs_in_ref])
 			# print(len(locs_in_data), ' locations in data for pixel ', pix_loc, len(locs_in_ref), ' locations in ref.')
 			if len(locs_in_data)==0:
 				tmp_charge = np.array([(pix_loc, 0.0)], dtype=data_tpc.dtype)
@@ -115,6 +123,7 @@ def npz2hdf5(npz_data, npz_ref, saveHDF5=False, output_hdf5=''):
 		
 			locs_in_data = np.where(np.all(data_tpc['pixels_locations']==pix_loc, axis=1))[0]
 			locs_in_ref = np.where(np.all(ref_data_tpc['pixels_locations']==pix_loc, axis=1))[0]
+			
 			charge_in_ref = np.sum(ref_data_tpc['accumulated_charge'][locs_in_ref])
 			charge_in_data = np.sum(data_tpc['accumulated_charge'][locs_in_data])
 			# print(locs_in_data, ' charge in data for pixel ', pix_loc, ': ', charge_in_data, ' ke-.', locs_in_ref, ' charge in ref: ', charge_in_ref, ' ke-.')
@@ -137,22 +146,41 @@ def npz2hdf5(npz_data, npz_ref, saveHDF5=False, output_hdf5=''):
 				pixLocs_ref_tpc = np.concatenate((pixLocs_ref_tpc, [pix_loc]))
 		# print(Q_tpc, ' Q_tpc shape: ', Q_tpc.shape)
 		# saving Q_allTPCs, Qref_allTPCs, pixLocs_allTPCs, pixLocs_ref_allTPCs
-		Q_allTPCs[itpc] = Q_tpc
-		Qref_allTPCs[itpc] = Qref_tpc
-		pixLocs_allTPCs[itpc] = pixLocs_tpc
-		pixLocs_ref_allTPCs[itpc] = pixLocs_ref_tpc
+		# Q_allTPCs[itpc] = Q_tpc
+		# Qref_allTPCs[itpc] = Qref_tpc
+		# pixLocs_allTPCs[itpc] = pixLocs_tpc
+		# pixLocs_ref_allTPCs[itpc] = pixLocs_ref_tpc
+
+		tpc_array = np.zeros(len(Q_tpc), dtype=[('pixels_locations', np.int32, (3,)), ('pixels_locations_ref', np.int32, (3,)), ('accumulated_charge', np.float32), ('accumulated_charge_ref', np.float32)])
+		if len(pixLocs_tpc) == 0:
+			tpc_array['pixels_locations'] = pixLocs_tpc.reshape(0,3)
+			tpc_array['pixels_locations_ref'] = pixLocs_ref_tpc.reshape(0,3)
+			tpc_array['accumulated_charge'] = Q_tpc[:]
+			tpc_array['accumulated_charge_ref'] = Qref_tpc[:]	
+		else:
+			tpc_array['pixels_locations'] = pixLocs_tpc[:]
+			tpc_array['pixels_locations_ref'] = pixLocs_ref_tpc[:]
+			tpc_array['accumulated_charge'] = Q_tpc[:]
+			tpc_array['accumulated_charge_ref'] = Qref_tpc[:]
+		all_tpc_data[itpc] = tpc_array
+
 	# print(deltaQ_allTPCs)
+	# if saveHDF5:
+	# 	with h5py.File(output_hdf5, 'w') as f:
+	# 		for itpc in Q_allTPCs.keys():
+	# 			print(type(Q_allTPCs[itpc]))
+	# 			# f.create_dataset(f'{itpc}/Q', data=Q_allTPCs[itpc])
+	# 			# f.create_dataset(f'{itpc}/Qref', data=Qref_allTPCs[itpc])
+	# 			# saving Q_allTPCs, Qref_allTPCs, pixLocs_allTPCs, pixLocs_ref_allTPCs
+	# 			f.create_dataset(f'{itpc}/Q', data=Q_allTPCs[itpc])
+	# 			f.create_dataset(f'{itpc}/Q_ref', data=Qref_allTPCs[itpc])
+	# 			f.create_dataset(f'{itpc}/pixLocs', data=pixLocs_allTPCs[itpc])
+	# 			f.create_dataset(f'{itpc}/pixLocs_ref', data=pixLocs_ref_allTPCs[itpc])
 	if saveHDF5:
 		with h5py.File(output_hdf5, 'w') as f:
-			for itpc in Q_allTPCs.keys():
-				print(type(Q_allTPCs[itpc]))
-				# f.create_dataset(f'{itpc}/Q', data=Q_allTPCs[itpc])
-				# f.create_dataset(f'{itpc}/Qref', data=Qref_allTPCs[itpc])
-				# saving Q_allTPCs, Qref_allTPCs, pixLocs_allTPCs, pixLocs_ref_allTPCs
-				f.create_dataset(f'{itpc}/Q', data=Q_allTPCs[itpc])
-				f.create_dataset(f'{itpc}/Q_ref', data=Qref_allTPCs[itpc])
-				f.create_dataset(f'{itpc}/pixLocs', data=pixLocs_allTPCs[itpc])
-				f.create_dataset(f'{itpc}/pixLocs_ref', data=pixLocs_ref_allTPCs[itpc])
+			for itpc in all_tpc_data.keys():
+				print(type(all_tpc_data[itpc]))
+				f.create_dataset(f'{itpc}', data=all_tpc_data[itpc])
 
 	# return Q_allTPCs, Qref_allTPCs
 
@@ -288,8 +316,11 @@ def load_Q_fromHDF5(hdf5_file='', cut_on_Qref=1): # ke-
 	with h5py.File(hdf5_file, 'r') as f:
 		tpc_keys = [key for key in f.keys() if key.startswith('tpc')]
 		for itpc in tpc_keys:
-			all_Qref = f[f'{itpc}/Q_ref'][:]
-			all_Q = f[f'{itpc}/Q'][:]
+			# print(f[f'{itpc}']['accumulated_charge_ref'])
+			# all_Qref = f[f'{itpc}/Q_ref'][:]
+			# all_Q = f[f'{itpc}/Q'][:]
+			all_Qref = f[itpc]['accumulated_charge_ref'][:]
+			all_Q = f[itpc]['accumulated_charge'][:]
 			Qref_allTPCs[itpc] = all_Qref
 			Q_allTPCs[itpc] = all_Q
 			# mask = all_Qref >= cut_on_Qref # only consider pixels where Q_ref is above the threshold
