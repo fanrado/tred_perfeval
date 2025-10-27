@@ -184,119 +184,6 @@ def npz2hdf5(npz_data, npz_ref, saveHDF5=False, output_hdf5=''):
 
 	# return Q_allTPCs, Qref_allTPCs
 
-# def get_deltaQ_fromNPZ__(npz_data, npz_ref, saveHDF5=False, output_hdf5='', cut_onQ=1): # ke-
-# 	data = load_npz(input_file=npz_data, cut_on_Q=1e-12)
-# 	ref_data = load_npz(input_file=npz_ref, cut_on_Q=1e-12)
-
-# 	Ntpcs = 7
-# 	deltaQ_allTPCs = {f'tpc{i}': None for i in range(Ntpcs)}  # Only first 3 TPCs for now
-# 	dQ_over_Q_allTPCs = {f'tpc{i}': None for i in range(Ntpcs)}  # Only first 3 TPCs for now
-# 	# saving Q_allTPCs, Qref_allTPCs, pixLocs_allTPCs, pixLocs_ref_allTPCs
-# 	## all charges are above the threshold
-# 	Q_allTPCs = {f'tpc{i}': None for i in range(Ntpcs)}
-# 	Qref_allTPCs = {f'tpc{i}': None for i in range(Ntpcs)}
-# 	pixLocs_allTPCs = {f'tpc{i}': None for i in range(Ntpcs)}
-# 	pixLocs_ref_allTPCs = {f'tpc{i}': None for i in range(Ntpcs)}
-# 	Npix = 0 # total number of pixels
-# 	Npix_below_thr = 0 # total number of pixels below threshold
-# 	for itpc in deltaQ_allTPCs.keys():
-# 		print('Processing ', itpc)
-# 		data_tpc = data[itpc]
-# 		ref_data_tpc = ref_data[itpc]
-# 		pix_locs_array = get_all_pixels_locations(data_tpc, ref_data_tpc)
-# 		# print(pix_locs_array.shape)
-# 		deltaQ = np.array([], dtype=np.float32)
-# 		dQ_over_Q = np.array([], dtype=np.float32)
-# 		# Saving Q, Qref, pixLocs, pixLocs_ref from each tpc
-# 		Q_tpc = np.array([], dtype=np.float32)
-# 		Qref_tpc =  np.array([], dtype=np.float32)
-# 		pixLocs_tpc = np.array([], dtype=np.int32)
-# 		pixLocs_ref_tpc = np.array([], dtype=np.int32)
-# 		Npix += len(pix_locs_array) # increment the total number of pixels
-# 		# print(Npix, ' total pixels so far.')
-# 		for pix_loc in pix_locs_array:
-# 			locs_in_data = np.where(np.all(data_tpc['pixels_locations']==pix_loc, axis=1))[0]
-# 			locs_in_ref = np.where(np.all(ref_data_tpc['pixels_locations']==pix_loc, axis=1))[0]
-# 			# print(len(locs_in_data), ' locations in data for pixel ', pix_loc, len(locs_in_ref), ' locations in ref.')
-# 			if len(locs_in_data)==0:
-# 				tmp_charge = np.array([(pix_loc, 0.0)], dtype=data_tpc.dtype)
-# 				data_tpc = rfn.stack_arrays((data_tpc, tmp_charge), usemask=False)
-# 			if len(locs_in_ref)==0:
-# 				tmp_charge = np.array([(pix_loc, 0.0)], dtype=ref_data_tpc.dtype)
-# 				ref_data_tpc = rfn.stack_arrays((ref_data_tpc, tmp_charge), usemask=False)
-		
-# 			locs_in_data = np.where(np.all(data_tpc['pixels_locations']==pix_loc, axis=1))[0]
-# 			locs_in_ref = np.where(np.all(ref_data_tpc['pixels_locations']==pix_loc, axis=1))[0]
-# 			charge_in_ref = np.sum(ref_data_tpc['accumulated_charge'][locs_in_ref])
-# 			charge_in_data = np.sum(data_tpc['accumulated_charge'][locs_in_data])
-# 			print(locs_in_data, ' charge in data for pixel ', pix_loc, ': ', charge_in_data, ' ke-.', locs_in_ref, ' charge in ref: ', charge_in_ref, ' ke-.')
-# 			if charge_in_ref < cut_onQ:
-# 				Npix_below_thr += 1 # increment the number of pixels below threshold
-# 			else: # only consider pixels where the reference charge is above the threshold
-# 				if len(deltaQ)==0:
-# 					deltaQ = np.array([charge_in_data - charge_in_ref], dtype=np.float32)
-# 					dQ_over_Q = np.array([(charge_in_data - charge_in_ref)/charge_in_ref], dtype=np.float32)
-# 					Q_tpc = np.array([charge_in_data], dtype=np.float32)
-# 					Qref_tpc = np.array([charge_in_ref], dtype=np.float32)
-# 					pixLocs_tpc = np.array([pix_loc], dtype=np.int32)
-# 					pixLocs_ref_tpc = np.array([pix_loc], dtype=np.int32)
-# 				else:
-# 					deltaQ = np.concatenate((deltaQ, [charge_in_data - charge_in_ref]))
-# 					dQ_over_Q = np.concatenate((dQ_over_Q, [(charge_in_data - charge_in_ref)/charge_in_ref]))
-# 					Q_tpc = np.concatenate((Q_tpc, [charge_in_data]))
-# 					Qref_tpc = np.concatenate((Qref_tpc, [charge_in_ref]))
-# 					pixLocs_tpc = np.concatenate((pixLocs_tpc, [pix_loc]))
-# 					pixLocs_ref_tpc = np.concatenate((pixLocs_ref_tpc, [pix_loc]))
-# 		# print(Npix_below_thr, ' pixels below threshold so far.')
-# 		# print(dQ_over_Q)
-# 		deltaQ_allTPCs[itpc] = deltaQ
-# 		dQ_over_Q_allTPCs[itpc] = dQ_over_Q
-# 		# saving Q_allTPCs, Qref_allTPCs, pixLocs_allTPCs, pixLocs_ref_allTPCs
-# 		Q_allTPCs[itpc] = Q_tpc
-# 		Qref_allTPCs[itpc] = Qref_tpc
-# 		pixLocs_allTPCs[itpc] = pixLocs_tpc
-# 		pixLocs_ref_allTPCs[itpc] = pixLocs_ref_tpc
-# 	# print(deltaQ_allTPCs)
-# 	if saveHDF5:
-# 		with h5py.File(output_hdf5, 'w') as f:
-# 			for itpc in deltaQ_allTPCs.keys():
-# 				print(type(deltaQ_allTPCs[itpc]))
-# 				f.create_dataset(f'{itpc}/deltaQ', data=deltaQ_allTPCs[itpc])
-# 				f.create_dataset(f'{itpc}/dQ_over_Q', data=dQ_over_Q_allTPCs[itpc])
-# 				# saving Q_allTPCs, Qref_allTPCs, pixLocs_allTPCs, pixLocs_ref_allTPCs
-# 				f.create_dataset(f'{itpc}/Q', data=Q_allTPCs[itpc])
-# 				f.create_dataset(f'{itpc}/Q_ref', data=Qref_allTPCs[itpc])
-# 				f.create_dataset(f'{itpc}/pixLocs', data=pixLocs_allTPCs[itpc])
-# 				f.create_dataset(f'{itpc}/pixLocs_ref', data=pixLocs_ref_allTPCs[itpc])
-# 			# total number of pixels
-# 			f.create_dataset('Npix_total', data=Npix)
-# 			f.create_dataset('Npix_below_threshold', data=Npix_below_thr)
-
-# 	return deltaQ_allTPCs, dQ_over_Q_allTPCs
-
-# def load_deltaQ_fromHDF5__(hdf5_file=''):
-# 	"""
-# 		Load deltaQ and dQ_over_Q from an HDF5 file.
-# 		Args:
-# 			hdf5_file (str): Path to the HDF5 file.
-# 		Returns:
-# 			deltaQ_allTPCs (dict): Dictionary of deltaQ arrays per TPC.
-# 			dQ_over_Q_allTPCs (dict): Dictionary of dQ_over_Q arrays per TPC.
-# 	"""
-# 	deltaQ_allTPCs = {}
-# 	dQ_over_Q_allTPCs = {}
-# 	with h5py.File(hdf5_file, 'r') as f:
-# 		tpc_keys = [key for key in f.keys() if key.startswith('tpc')]
-# 		for itpc in tpc_keys:
-# 			deltaQ_allTPCs[itpc] = f[f'{itpc}/deltaQ'][:]
-# 			dQ_over_Q_allTPCs[itpc] = f[f'{itpc}/dQ_over_Q'][:]
-# 			# loc_minusone = np.where(dQ_over_Q_allTPCs[itpc]==-1.0)[0]
-# 			# print('--------------------------------')
-# 			# print(f[f'{itpc}/Q'][loc_minusone], '\t', f[f'{itpc}/Q_ref'][loc_minusone])
-# 			# print(f[f'{itpc}/pixLocs'].shape)
-# 			# sys.exit()
-# 			# print(f[f'{itpc}/Q_ref'][loc_minusone])
-# 	return deltaQ_allTPCs, dQ_over_Q_allTPCs
 
 def load_Q_fromHDF5(hdf5_file='', cut_on_Qref=1): # ke-
 	"""
@@ -311,6 +198,8 @@ def load_Q_fromHDF5(hdf5_file='', cut_on_Qref=1): # ke-
 	Qref_allTPCs = {}
 	deltaQ_allTPCs = {}
 	dQ_over_Q_allTPCs = {}
+	high_dQ_over_Q_allTPCs = {f'tpc{i}': {'dQ_over_Q': [], 'pixel_locs': []} for i in range(70)}
+	
 	Npix_total = 0
 	Npix_below_thr = 0
 	with h5py.File(hdf5_file, 'r') as f:
@@ -321,6 +210,8 @@ def load_Q_fromHDF5(hdf5_file='', cut_on_Qref=1): # ke-
 			# all_Q = f[f'{itpc}/Q'][:]
 			all_Qref = f[itpc]['accumulated_charge_ref'][:]
 			all_Q = f[itpc]['accumulated_charge'][:]
+			all_pixlocs = f[itpc]['pixels_locations'][:]
+			all_pixlocs_ref = f[itpc]['pixels_locations_ref'][:]
 			Qref_allTPCs[itpc] = all_Qref
 			Q_allTPCs[itpc] = all_Q
 			# mask = all_Qref >= cut_on_Qref # only consider pixels where Q_ref is above the threshold
@@ -333,6 +224,8 @@ def load_Q_fromHDF5(hdf5_file='', cut_on_Qref=1): # ke-
 			# dQ_over_Q_allTPCs[itpc] = (f[f'{itpc}/Q'][:][mask] - f[f'{itpc}/Q_ref'][:][mask]) / f[f'{itpc}/Q_ref'][:][mask]
 			deltaQ_allTPCs[itpc] = []
 			dQ_over_Q_allTPCs[itpc] = []
+			# high_dQ_over_Q_allTPCs[itpc] = []
+
 			mask_nocharge = all_Qref == 0.0
 			Npix_total += len(all_Qref[~mask_nocharge]) # total number of pixels
 			Npix_below_thr += np.sum(all_Qref[~mask_nocharge] < cut_on_Qref) # total number of pixels below threshold
@@ -340,6 +233,8 @@ def load_Q_fromHDF5(hdf5_file='', cut_on_Qref=1): # ke-
 				# charge_in_data = f[f'{itpc}/Q'][:][i]
 				charge_in_data = all_Q[i]
 				charge_in_ref = all_Qref[i]
+				# print(f'pixel loc data : {all_pixlocs[i]} \t pixel loc ref : {all_pixlocs_ref[i]}')
+				# print(f'same pix locs ? {np.array_equal(all_pixlocs[i], all_pixlocs_ref[i])}')
 				deltaQ_allTPCs[itpc].append(charge_in_data - charge_in_ref)
 				if all_Qref[i] < cut_on_Qref:
 					continue
@@ -347,16 +242,28 @@ def load_Q_fromHDF5(hdf5_file='', cut_on_Qref=1): # ke-
 				# charge_in_data = f[f'{itpc}/Q'][:][i]
 				# charge_in_ref = all_Qref[i]
 				# deltaQ_allTPCs[itpc].append(charge_in_data - charge_in_ref)
-				dQ_over_Q_allTPCs[itpc].append((charge_in_data - charge_in_ref) / charge_in_ref)
+				dQ_overQ = (charge_in_data - charge_in_ref) / charge_in_ref
+				# dQ_over_Q_allTPCs[itpc].append((charge_in_data - charge_in_ref) / charge_in_ref)
+				dQ_over_Q_allTPCs[itpc].append(dQ_overQ)
+				if dQ_overQ >= 10: # ?ke-
+				# print(f'pixel loc data: {all_pixlocs[i]} \t pixel loc ref: {all_pixlocs_ref[i]}')
+				# high_dQ_over_Q_allTPCs[itpc].append(dQ_overQ)
+					high_dQ_over_Q_allTPCs[itpc]['dQ_over_Q'].append(dQ_overQ)
+					high_dQ_over_Q_allTPCs[itpc]['pixel_locs'].append(all_pixlocs[i])
 			deltaQ_allTPCs[itpc] = np.array(deltaQ_allTPCs[itpc], dtype=np.float32)
 			dQ_over_Q_allTPCs[itpc] = np.array(dQ_over_Q_allTPCs[itpc], dtype=np.float32)
+			# high_dQ_over_Q_allTPCs[itpc] = np.array(high_dQ_over_Q_allTPCs[itpc], dtype=np.float32)
+			high_dQ_over_Q_allTPCs[itpc]['dQ_over_Q'] = np.array(high_dQ_over_Q_allTPCs[itpc]['dQ_over_Q'], dtype=np.float32)
+			high_dQ_over_Q_allTPCs[itpc]['pixel_locs'] = np.array(high_dQ_over_Q_allTPCs[itpc]['pixel_locs'], dtype=np.int32)
+	# sys.exit()
 	plot_dist = False
 	if plot_dist:
 		title = hdf5_file.split('/')[-1].replace('.hdf5', '')
 		list_Q = [(Q_allTPCs, 'Q', 'blue'), (Qref_allTPCs, r'$Q_{ref}$', 'orange')]
 		output_file = hdf5_file.replace('.hdf5', '_Q_distribution.png')
 		overlay_hists_deltaQ(*list_Q, title=title, xlabel='Accumulated Charge [ke-]', ylabel='Counts', output_file=output_file)
-	return deltaQ_allTPCs, dQ_over_Q_allTPCs, Npix_total, Npix_below_thr
+	# return deltaQ_allTPCs, dQ_over_Q_allTPCs, Npix_total, Npix_below_thr
+	return deltaQ_allTPCs, dQ_over_Q_allTPCs, high_dQ_over_Q_allTPCs, Npix_total, Npix_below_thr
 	# return Q_allTPCs, Qref_allTPCs
 	
 
@@ -395,6 +302,55 @@ def overlay_hists_deltaQ(*deltaQ_list, title, xlabel, ylabel, output_file=''):
 	plt.tight_layout()
 	plt.savefig(output_file)
 	plt.close()
+
+def pixel_map(pix_with_relativeCharge, output_file='pixel_map_dQ_over_Q.png'):
+	"""
+		2D plot of pixel locations where each point in the 2d plane represents a pixel location (x,y) and the color represents the dQ/Q value at that pixel location.
+		Args:
+			pix_with_relativeCharge (dict): Dictionary with keys 'pixel_locs' and 'dQ_over_Q'.
+	"""
+	all_pix_locs = np.array([], dtype=np.int32)
+	all_dQ_over_Q = np.array([], dtype=np.float32)
+	for itpc in pix_with_relativeCharge.keys():
+		if len(pix_with_relativeCharge[itpc]['pixel_locs'])==0:
+			continue
+		if len(all_pix_locs)==0:
+			all_pix_locs = pix_with_relativeCharge[itpc]['pixel_locs']
+			all_dQ_over_Q = pix_with_relativeCharge[itpc]['dQ_over_Q']
+		else:
+			all_pix_locs = np.concatenate((all_pix_locs, pix_with_relativeCharge[itpc]['pixel_locs']), axis=0)
+			all_dQ_over_Q = np.concatenate((all_dQ_over_Q, pix_with_relativeCharge[itpc]['dQ_over_Q']), axis=0)
+	pix_with_relativeCharge = {
+		'pixel_locs': all_pix_locs,
+		'dQ_over_Q': all_dQ_over_Q
+	}
+	# print(pix_with_relativeCharge['pixel_locs'])
+	x_locs = pix_with_relativeCharge['pixel_locs'][:,0]
+	y_locs = pix_with_relativeCharge['pixel_locs'][:,1]
+	relative_charges = pix_with_relativeCharge['dQ_over_Q']
+
+	# Calculate the range of your data
+	x_min, x_max = np.min(x_locs), np.max(x_locs)
+	y_min, y_max = np.min(y_locs), np.max(y_locs)
+
+	# Create bin edges with step size of 1
+	x_bins = np.arange(x_min - 0.5, x_max + 1.5, 1)  # -0.5 to +0.5 around each integer
+	y_bins = np.arange(y_min - 0.5, y_max + 1.5, 1)
+
+	plt.figure(figsize=(10,8))
+	plt.hist2d(x_locs, y_locs, weights=relative_charges, bins=[x_bins, y_bins], cmap='viridis')
+	# plt.colorbar(sc, label='dQ/Q')
+	plt.colorbar(label='dQ/Q')
+	plt.xlabel('X Pixel Location')
+
+	plt.ylabel('Y Pixel Location')
+	plt.xlim([x_min, 200])
+	plt.title('Pixel Map Colored by dQ/Q')
+	plt.grid(True, linestyle='--', alpha=0.5)
+	plt.savefig(output_file, dpi=300)
+	plt.close()
+    
+
 
 if __name__=='__main__':
 	## -------------------------------------------------
