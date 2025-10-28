@@ -69,8 +69,6 @@ def get_all_pixels_locations(data_tpc, ref_data_tpc):
 	"""
 	combined = np.vstack((data_tpc['pixels_locations'], ref_data_tpc['pixels_locations']))
 	pix_locs = np.unique(combined, axis=0)
-	# print(len(combined), ' combined pixel locations.', len(pix_locs), ' unique pixel locations.')
-	# print(len(np.unique(data_tpc['pixels_locations'])), ' data pixel locations.', len(np.unique(ref_data_tpc['pixels_locations'])), ' ref pixel locations.')
 	return pix_locs
 
 def npz2hdf5(npz_data, npz_ref, saveHDF5=False, output_hdf5=''):
@@ -78,14 +76,6 @@ def npz2hdf5(npz_data, npz_ref, saveHDF5=False, output_hdf5=''):
 	data = load_npz(input_file=npz_data, cut_on_Q=1e-12)
 
 	Ntpcs = 70
-	# deltaQ_allTPCs = {f'tpc{i}': None for i in range(Ntpcs)}  # Only first 3 TPCs for now
-	# dQ_over_Q_allTPCs = {f'tpc{i}': None for i in range(Ntpcs)}  # Only first 3 TPCs for now
-	# saving Q_allTPCs, Qref_allTPCs, pixLocs_allTPCs, pixLocs_ref_allTPCs
-	## all charges are above the threshold
-	# Q_allTPCs = {f'tpc{i}': None for i in range(Ntpcs)}
-	# Qref_allTPCs = {f'tpc{i}': None for i in range(Ntpcs)}
-	# pixLocs_allTPCs = {f'tpc{i}': None for i in range(Ntpcs)}
-	# pixLocs_ref_allTPCs = {f'tpc{i}': None for i in range(Ntpcs)}
 	all_tpc_data = {f'tpc{i}': None for i in range(Ntpcs)}
 	# Npix = 0 # total number of pixels
 	# Npix_below_thr = 0 # total number of pixels below threshold
@@ -95,9 +85,6 @@ def npz2hdf5(npz_data, npz_ref, saveHDF5=False, output_hdf5=''):
 		data_tpc = data[itpc]
 		ref_data_tpc = ref_data[itpc]
 		pix_locs_array = get_all_pixels_locations(data_tpc, ref_data_tpc)
-		# print(pix_locs_array.shape)
-		# deltaQ = np.array([], dtype=np.float32)
-		# dQ_over_Q = np.array([], dtype=np.float32)
 		# Saving Q, Qref, pixLocs, pixLocs_ref from each tpc
 		Q_tpc = np.array([], dtype=np.float32)
 		Qref_tpc =  np.array([], dtype=np.float32)
@@ -131,25 +118,15 @@ def npz2hdf5(npz_data, npz_ref, saveHDF5=False, output_hdf5=''):
 			# 	Npix_below_thr += 1 # increment the number of pixels below threshold
 			# else: # only consider pixels where the reference charge is above the threshold
 			if len(Q_tpc)==0:
-				# deltaQ = np.array([charge_in_data - charge_in_ref], dtype=np.float32)
-				# dQ_over_Q = np.array([(charge_in_data - charge_in_ref)/charge_in_ref], dtype=np.float32)
 				Q_tpc = np.array([charge_in_data], dtype=np.float32)
 				Qref_tpc = np.array([charge_in_ref], dtype=np.float32)
 				pixLocs_tpc = np.array([pix_loc], dtype=np.int32)
 				pixLocs_ref_tpc = np.array([pix_loc], dtype=np.int32)
 			else:
-				# deltaQ = np.concatenate((deltaQ, [charge_in_data - charge_in_ref]))
-				# dQ_over_Q = np.concatenate((dQ_over_Q, [(charge_in_data - charge_in_ref)/charge_in_ref]))
 				Q_tpc = np.concatenate((Q_tpc, [charge_in_data]))
 				Qref_tpc = np.concatenate((Qref_tpc, [charge_in_ref]))
 				pixLocs_tpc = np.concatenate((pixLocs_tpc, [pix_loc]))
 				pixLocs_ref_tpc = np.concatenate((pixLocs_ref_tpc, [pix_loc]))
-		# print(Q_tpc, ' Q_tpc shape: ', Q_tpc.shape)
-		# saving Q_allTPCs, Qref_allTPCs, pixLocs_allTPCs, pixLocs_ref_allTPCs
-		# Q_allTPCs[itpc] = Q_tpc
-		# Qref_allTPCs[itpc] = Qref_tpc
-		# pixLocs_allTPCs[itpc] = pixLocs_tpc
-		# pixLocs_ref_allTPCs[itpc] = pixLocs_ref_tpc
 
 		tpc_array = np.zeros(len(Q_tpc), dtype=[('pixels_locations', np.int32, (3,)), ('pixels_locations_ref', np.int32, (3,)), ('accumulated_charge', np.float32), ('accumulated_charge_ref', np.float32)])
 		if len(pixLocs_tpc) == 0:
@@ -164,18 +141,6 @@ def npz2hdf5(npz_data, npz_ref, saveHDF5=False, output_hdf5=''):
 			tpc_array['accumulated_charge_ref'] = Qref_tpc[:]
 		all_tpc_data[itpc] = tpc_array
 
-	# print(deltaQ_allTPCs)
-	# if saveHDF5:
-	# 	with h5py.File(output_hdf5, 'w') as f:
-	# 		for itpc in Q_allTPCs.keys():
-	# 			print(type(Q_allTPCs[itpc]))
-	# 			# f.create_dataset(f'{itpc}/Q', data=Q_allTPCs[itpc])
-	# 			# f.create_dataset(f'{itpc}/Qref', data=Qref_allTPCs[itpc])
-	# 			# saving Q_allTPCs, Qref_allTPCs, pixLocs_allTPCs, pixLocs_ref_allTPCs
-	# 			f.create_dataset(f'{itpc}/Q', data=Q_allTPCs[itpc])
-	# 			f.create_dataset(f'{itpc}/Q_ref', data=Qref_allTPCs[itpc])
-	# 			f.create_dataset(f'{itpc}/pixLocs', data=pixLocs_allTPCs[itpc])
-	# 			f.create_dataset(f'{itpc}/pixLocs_ref', data=pixLocs_ref_allTPCs[itpc])
 	if saveHDF5:
 		with h5py.File(output_hdf5, 'w') as f:
 			for itpc in all_tpc_data.keys():
@@ -214,14 +179,6 @@ def load_Q_fromHDF5(hdf5_file='', cut_on_Qref=1): # ke-
 			all_pixlocs_ref = f[itpc]['pixels_locations_ref'][:]
 			Qref_allTPCs[itpc] = all_Qref
 			Q_allTPCs[itpc] = all_Q
-			# mask = all_Qref >= cut_on_Qref # only consider pixels where Q_ref is above the threshold
-			# mask_nocharge = all_Qref == 0.0
-			# Npix_total += len(all_Qref[~mask_nocharge]) # total number of pixels
-			# # print(len(all_Qref[mask_nocharge]), len(all_Qref))
-			# Npix_below_thr += np.sum(all_Qref[~mask_nocharge] < cut_on_Qref) # total number of pixels below threshold
-			# # print(f'TPC {itpc}: {len(all_Qref)} total pixels, {np.sum(all_Qref < cut_on_Qref)} pixels below threshold of {cut_on_Qref} ke-.')
-			# deltaQ_allTPCs[itpc] = (f[f'{itpc}/Q'][:][mask] - f[f'{itpc}/Q_ref'][:][mask])
-			# dQ_over_Q_allTPCs[itpc] = (f[f'{itpc}/Q'][:][mask] - f[f'{itpc}/Q_ref'][:][mask]) / f[f'{itpc}/Q_ref'][:][mask]
 			deltaQ_allTPCs[itpc] = []
 			dQ_over_Q_allTPCs[itpc] = []
 			# high_dQ_over_Q_allTPCs[itpc] = []
@@ -233,15 +190,9 @@ def load_Q_fromHDF5(hdf5_file='', cut_on_Qref=1): # ke-
 				# charge_in_data = f[f'{itpc}/Q'][:][i]
 				charge_in_data = all_Q[i]
 				charge_in_ref = all_Qref[i]
-				# print(f'pixel loc data : {all_pixlocs[i]} \t pixel loc ref : {all_pixlocs_ref[i]}')
-				# print(f'same pix locs ? {np.array_equal(all_pixlocs[i], all_pixlocs_ref[i])}')
 				deltaQ_allTPCs[itpc].append(charge_in_data - charge_in_ref)
 				if all_Qref[i] < cut_on_Qref:
 					continue
-				## calculating deltaQ after the cut on Q_ref results in a non-symmetric distribution
-				# charge_in_data = f[f'{itpc}/Q'][:][i]
-				# charge_in_ref = all_Qref[i]
-				# deltaQ_allTPCs[itpc].append(charge_in_data - charge_in_ref)
 				dQ_overQ = (charge_in_data - charge_in_ref) / charge_in_ref
 				# dQ_over_Q_allTPCs[itpc].append((charge_in_data - charge_in_ref) / charge_in_ref)
 				dQ_over_Q_allTPCs[itpc].append(dQ_overQ)
