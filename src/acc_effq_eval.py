@@ -4,7 +4,7 @@ import numpy.lib.recfunctions as rfn
 import matplotlib.pyplot as plt
 import h5py
 
-def load_npz(input_file='', cut_on_Q=1): #ke-
+def load_npz(input_file='', cut_on_Q=1, getEffq=False): #ke-
 	"""
 		Accumulated charge per TPC per event.
 		Args:
@@ -14,10 +14,19 @@ def load_npz(input_file='', cut_on_Q=1): #ke-
 				-- [('pixels_locations', '<i4', (3,)), ('accumulated_charge', '<f4')]
 				-- Accumulated charge per pixel : shape (1340,)
 				-- Pixel locations : shape (1340, 3)
+		####
+		Let's get the effq instead of charge at the anode.
 	"""
+	key = 'current'
+	key_output = 'accumulated_charge'
+	if getEffq:
+		key = 'effq_tpc'
+		key_output = 'effective_charge'
 	data = np.load(input_file)
-	current_keys = [k for k in data.keys() if ('current' in k) and ('location' not in k)]
-	current_location_keys = [k for k in data.keys() if ('current' in k) and ('location' in k)]
+	# current_keys = [k for k in data.keys() if ('current' in k) and ('location' not in k)]
+	# current_location_keys = [k for k in data.keys() if ('current' in k) and ('location' in k)]
+	current_keys = [k for k in data.keys() if (key in k) and ('location' not in k)]
+	current_location_keys = [k for k in data.keys() if (key in k) and ('location' in k)]
 
 	tpcs_keys = {f'tpc{i}': [] for i in range(70)}
 	for i in range(70):
@@ -36,26 +45,31 @@ def load_npz(input_file='', cut_on_Q=1): #ke-
 		tpc_key = f'tpc{itpc}'
 		tmp_tpc_data = {
 			'pixels_locations': np.array([], dtype=np.int32),
-			'accumulated_charge': np.array([], dtype=np.float32)
+			key_output: np.array([], dtype=np.float32)
 		}
 
 		for i, key in enumerate(tpcs_keys[tpc_key]):
 			print(key)
-			acc_charge = np.sum(data[key], axis=-1).reshape(-1) # sum over the last axis to get the accumulated charge per pixel
+			acc_charge = None
+			if getEffq:
+				acc_charge = data[key][:, -1] ### Get the effective charge at a pixel location
+			else:
+				acc_charge = np.sum(data[key], axis=-1).reshape(-1) # sum over the last axis to get the accumulated charge per pixel
 			mask = acc_charge >= cut_on_Q
 			# acc_charge = acc_charge[mask]
 			if i==0:
-				tmp_tpc_data['accumulated_charge'] = acc_charge[mask]
+				tmp_tpc_data[key_output] = acc_charge[mask]
 				tmp_tpc_data['pixels_locations'] = data[f'{key}_location'][mask]
 			else:
 				tmp_tpc_data['pixels_locations'] = np.concatenate((tmp_tpc_data['pixels_locations'], data[f'{key}_location'][mask]), axis=0)
-				tmp_tpc_data['accumulated_charge'] = np.concatenate((tmp_tpc_data['accumulated_charge'], acc_charge[mask]), axis=0)
-		# Create a numpy structured array with fields 'pixels_locations' and 'accumulated_charge'
-		tpc_data = np.zeros(len(tmp_tpc_data['pixels_locations']), dtype=[('pixels_locations', np.int32, (3,)), ('accumulated_charge', np.float32)])
+				# tmp_tpc_data[key_output] = np.concatenate((tmp_tpc_data[key_output], acc_charge[mask]), axis=0)
+				tmp_tpc_data[key_output] = np.concatenate((tmp_tpc_data[key_output], acc_charge[mask]), axis=0)
+		# Create a numpy structured array with fields 'pixels_locations' and key_output
+		tpc_data = np.zeros(len(tmp_tpc_data['pixels_locations']), dtype=[('pixels_locations', np.int32, (3,)), (key_output, np.float32)])
 		## This try-except is to handle empty TPC data
 		try:
 			tpc_data['pixels_locations'] = tmp_tpc_data['pixels_locations']
-			tpc_data['accumulated_charge'] = tmp_tpc_data['accumulated_charge']
+			tpc_data[key_output] = tmp_tpc_data[key_output]
 		except:
 			print('Empty TPC data for ', tpc_key)
 			# continue
@@ -71,9 +85,12 @@ def get_all_pixels_locations(data_tpc, ref_data_tpc):
 	pix_locs = np.unique(combined, axis=0)
 	return pix_locs
 
-def npz2hdf5(npz_data, npz_ref, saveHDF5=False, output_hdf5=''):
-	ref_data = load_npz(input_file=npz_ref, cut_on_Q=1e-12)
-	data = load_npz(input_file=npz_data, cut_on_Q=1e-12)
+def npz2hdf5(npz_data, npz_ref, saveHDF5=False, output_hdf5='', getEffq=False):
+	metric_name = 'accumulated_charge'
+	if getEffq:
+		metric_name = 'effective_charge'
+	ref_data = load_npz(input_file=npz_ref, cut_on_Q=1e-12, getEffq=getEffq)
+	data = load_npz(input_file=npz_data, cut_on_Q=1e-12, getEffq=getEffq)
 
 	Ntpcs = 70
 	all_tpc_data = {f'tpc{i}': None for i in range(Ntpcs)}
@@ -95,11 +112,11 @@ def npz2hdf5(npz_data, npz_ref, saveHDF5=False, output_hdf5=''):
 		for pix_loc in pix_locs_array:
 			locs_in_data = np.where(np.all(data_tpc['pixels_locations']==pix_loc, axis=1))[0]
 			locs_in_ref = np.where(np.all(ref_data_tpc['pixels_locations']==pix_loc, axis=1))[0]
-			if len(ref_data_tpc['accumulated_charge'][locs_in_ref]) > 1:
+			if len(ref_data_tpc[metric_name][locs_in_ref]) > 1:
 				print('Filename : ', npz_ref.split('/')[-1])
-				print(f'{len(ref_data_tpc['accumulated_charge'][locs_in_ref])} duplicate locations.')
+				print(f'{len(ref_data_tpc[metric_name][locs_in_ref])} duplicate locations.')
 				print(f'{ref_data_tpc['pixels_locations'][locs_in_ref]}')
-				print('Charges on the duplicate locations: ', ref_data_tpc['accumulated_charge'][locs_in_ref])
+				print('Charges on the duplicate locations: ', ref_data_tpc[metric_name][locs_in_ref])
 			# print(len(locs_in_data), ' locations in data for pixel ', pix_loc, len(locs_in_ref), ' locations in ref.')
 			if len(locs_in_data)==0:
 				tmp_charge = np.array([(pix_loc, 0.0)], dtype=data_tpc.dtype)
@@ -111,8 +128,8 @@ def npz2hdf5(npz_data, npz_ref, saveHDF5=False, output_hdf5=''):
 			locs_in_data = np.where(np.all(data_tpc['pixels_locations']==pix_loc, axis=1))[0]
 			locs_in_ref = np.where(np.all(ref_data_tpc['pixels_locations']==pix_loc, axis=1))[0]
 			
-			charge_in_ref = np.sum(ref_data_tpc['accumulated_charge'][locs_in_ref])
-			charge_in_data = np.sum(data_tpc['accumulated_charge'][locs_in_data])
+			charge_in_ref = np.sum(ref_data_tpc[metric_name][locs_in_ref])
+			charge_in_data = np.sum(data_tpc[metric_name][locs_in_data])
 			# print(locs_in_data, ' charge in data for pixel ', pix_loc, ': ', charge_in_data, ' ke-.', locs_in_ref, ' charge in ref: ', charge_in_ref, ' ke-.')
 			# if charge_in_ref < cut_onQ:
 			# 	Npix_below_thr += 1 # increment the number of pixels below threshold
@@ -128,17 +145,17 @@ def npz2hdf5(npz_data, npz_ref, saveHDF5=False, output_hdf5=''):
 				pixLocs_tpc = np.concatenate((pixLocs_tpc, [pix_loc]))
 				pixLocs_ref_tpc = np.concatenate((pixLocs_ref_tpc, [pix_loc]))
 
-		tpc_array = np.zeros(len(Q_tpc), dtype=[('pixels_locations', np.int32, (3,)), ('pixels_locations_ref', np.int32, (3,)), ('accumulated_charge', np.float32), ('accumulated_charge_ref', np.float32)])
+		tpc_array = np.zeros(len(Q_tpc), dtype=[('pixels_locations', np.int32, (3,)), ('pixels_locations_ref', np.int32, (3,)), (metric_name, np.float32), (f'{metric_name}_ref', np.float32)])
 		if len(pixLocs_tpc) == 0:
 			tpc_array['pixels_locations'] = pixLocs_tpc.reshape(0,3)
 			tpc_array['pixels_locations_ref'] = pixLocs_ref_tpc.reshape(0,3)
-			tpc_array['accumulated_charge'] = Q_tpc[:]
-			tpc_array['accumulated_charge_ref'] = Qref_tpc[:]	
+			tpc_array[metric_name] = Q_tpc[:]
+			tpc_array[f'{metric_name}_ref'] = Qref_tpc[:]	
 		else:
 			tpc_array['pixels_locations'] = pixLocs_tpc[:]
 			tpc_array['pixels_locations_ref'] = pixLocs_ref_tpc[:]
-			tpc_array['accumulated_charge'] = Q_tpc[:]
-			tpc_array['accumulated_charge_ref'] = Qref_tpc[:]
+			tpc_array[metric_name] = Q_tpc[:]
+			tpc_array[f'{metric_name}_ref'] = Qref_tpc[:]
 		all_tpc_data[itpc] = tpc_array
 
 	if saveHDF5:
@@ -150,7 +167,7 @@ def npz2hdf5(npz_data, npz_ref, saveHDF5=False, output_hdf5=''):
 	# return Q_allTPCs, Qref_allTPCs
 
 
-def load_Q_fromHDF5(hdf5_file='', cut_on_Qref=1): # ke-
+def load_Q_fromHDF5(hdf5_file='', cut_on_Qref=1, getEffq=False): # ke-
 	"""
 		Load Q and Q_ref from an HDF5 file.
 		Args:
@@ -159,6 +176,10 @@ def load_Q_fromHDF5(hdf5_file='', cut_on_Qref=1): # ke-
 			Q_allTPCs (dict): Dictionary of Q arrays per TPC.
 			Qref_allTPCs (dict): Dictionary of Q_ref arrays per TPC.
 	"""
+
+	metric_name = 'accumulated_charge'
+	if getEffq:
+		metric_name = 'effective_charge'
 	Q_allTPCs = {}
 	Qref_allTPCs = {}
 	deltaQ_allTPCs = {}
@@ -173,8 +194,8 @@ def load_Q_fromHDF5(hdf5_file='', cut_on_Qref=1): # ke-
 			# print(f[f'{itpc}']['accumulated_charge_ref'])
 			# all_Qref = f[f'{itpc}/Q_ref'][:]
 			# all_Q = f[f'{itpc}/Q'][:]
-			all_Qref = f[itpc]['accumulated_charge_ref'][:]
-			all_Q = f[itpc]['accumulated_charge'][:]
+			all_Qref = f[itpc][f'{metric_name}_ref'][:]
+			all_Q = f[itpc][metric_name][:]
 			all_pixlocs = f[itpc]['pixels_locations'][:]
 			all_pixlocs_ref = f[itpc]['pixels_locations_ref'][:]
 			Qref_allTPCs[itpc] = all_Qref
@@ -201,18 +222,22 @@ def load_Q_fromHDF5(hdf5_file='', cut_on_Qref=1): # ke-
 				# high_dQ_over_Q_allTPCs[itpc].append(dQ_overQ)
 					high_dQ_over_Q_allTPCs[itpc]['dQ_over_Q'].append(dQ_overQ)
 					high_dQ_over_Q_allTPCs[itpc]['pixel_locs'].append(all_pixlocs[i])
+			# print(deltaQ_allTPCs[itpc])
 			deltaQ_allTPCs[itpc] = np.array(deltaQ_allTPCs[itpc], dtype=np.float32)
 			dQ_over_Q_allTPCs[itpc] = np.array(dQ_over_Q_allTPCs[itpc], dtype=np.float32)
 			# high_dQ_over_Q_allTPCs[itpc] = np.array(high_dQ_over_Q_allTPCs[itpc], dtype=np.float32)
 			high_dQ_over_Q_allTPCs[itpc]['dQ_over_Q'] = np.array(high_dQ_over_Q_allTPCs[itpc]['dQ_over_Q'], dtype=np.float32)
 			high_dQ_over_Q_allTPCs[itpc]['pixel_locs'] = np.array(high_dQ_over_Q_allTPCs[itpc]['pixel_locs'], dtype=np.int32)
 	# sys.exit()
-	plot_dist = False
+	plot_dist = True
 	if plot_dist:
+		xlabel = 'Accumulated Charge'
+		if getEffq:
+			xlabel = 'Effective Charge'
 		title = hdf5_file.split('/')[-1].replace('.hdf5', '')
 		list_Q = [(Q_allTPCs, 'Q', 'blue'), (Qref_allTPCs, r'$Q_{ref}$', 'orange')]
 		output_file = hdf5_file.replace('.hdf5', '_Q_distribution.png')
-		overlay_hists_deltaQ(*list_Q, title=title, xlabel='Accumulated Charge [ke-]', ylabel='Counts', output_file=output_file)
+		overlay_hists_deltaQ(*list_Q, title=title, xlabel=f'{xlabel} [ke-]', ylabel='Counts', output_file=output_file)
 	# return deltaQ_allTPCs, dQ_over_Q_allTPCs, Npix_total, Npix_below_thr
 	return deltaQ_allTPCs, dQ_over_Q_allTPCs, high_dQ_over_Q_allTPCs, Npix_total, Npix_below_thr
 	# return Q_allTPCs, Qref_allTPCs
