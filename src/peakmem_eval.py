@@ -39,9 +39,14 @@ def organize_peakmem_data(data: dict):
 				for key2, value2 in value1.items():
 					if not isinstance(value2, dict):
 						continue
+					print(value2.keys())
 					for key in ['mem_limit_MB', 'shape_limit', 'xyz_limit']:
 						if params_for_dynamic_chunking_batching[key] is None:
-							params_for_dynamic_chunking_batching[key] = value2[key]
+							try:
+								params_for_dynamic_chunking_batching[key] = value2[key]
+							except:
+								# print(f'key {key} not found in the data {value}')
+								pass
 					event_ids.append(value2['event_id'])
 					N_segments.append(value2['N_segments'])
 					N_qblocks.append(value2['N_qblock'])
@@ -89,12 +94,13 @@ def overlay_plots(*args, title='', xlabel='', ylabel='', output_file='overlay_pl
 	"""
 	plt.figure(figsize=(12,8))
 	for x_data, y_data, label, color in args:
-		plt.scatter(x_data, y_data, label=label, color=color, alpha=0.7, s=100)
+		plt.scatter(x_data, y_data, label=label, color=color, alpha=0.6, s=100)
 	plt.xlabel(xlabel, fontsize=20)
 	plt.ylabel(ylabel, fontsize=20)
 	plt.title(title, fontsize=20)
 	plt.xticks(fontsize=20)
 	plt.yticks(fontsize=20)
+	plt.tight_layout()
 	plt.legend(loc='upper right', fontsize=15)
 	plt.grid(True)
 	plt.savefig(output_file)
@@ -121,6 +127,8 @@ def benchmark_peak_memory_nodynamic_chunking_and_batching(input_path: str):
 	list_of_tuple_data = []
 	colors = ['red', 'green', 'black', 'purple', 'yellow', 'maroon']
 	for i,f in enumerate(list_of_files):
+		if f=='peak_memory_usage_batch8192_nbchunk50_nbchunkconv10.json':
+			continue
 		file_path = '/'.join([input_path, f])
 		f_split = f.split('.')[0].split('_')[3:]
 		label = f'Batch size: {f_split[0].replace("batch","")}, \nnbchunk: {f_split[1].replace("nbchunk","")}, nbchunk_conv: {f_split[2].replace("nbchunkconv","")}'
@@ -132,7 +140,7 @@ def benchmark_peak_memory_nodynamic_chunking_and_batching(input_path: str):
 		# else:
 		tuple_data = (organized_data['N_segments'], organized_data['peak_memory_perbatch'], label, colors[i])
 		list_of_tuple_data.append(tuple_data)
-	overlay_plots(*list_of_tuple_data, title='Peak memory vs N_segments (No Dynamic Chunking and Batching)', xlabel='N segments', ylabel='Peak Memory (MB)', output_file='/'.join([input_path, 'peakmem_vs_Nsegments_nodynamic_chunking_batching.png']))
+	overlay_plots(*list_of_tuple_data, title='Peak memory vs N_segments', xlabel='N segments', ylabel='Peak Memory (MB)', output_file='/'.join([input_path, 'peakmem_vs_Nsegments_nodynamic_chunking_batching.png']))
 
 def benchmark_peak_memory_dynamic_chunking_and_batching(input_path: str):
 	"""
@@ -141,18 +149,25 @@ def benchmark_peak_memory_dynamic_chunking_and_batching(input_path: str):
 	list_of_files 			= [f for f in os.listdir(input_path) if f.endswith('.json')]
 	list_of_tuple_data 		= []
 	colors 					= ['red', 'green', 'black', 'purple', 'yellow', 'maroon']
+	if len(list_of_files) > len(colors):
+		colors = []
+		for i in range(len(list_of_files)):
+			colors.append(np.random.rand(3,))
 	for i, f in enumerate(list_of_files):
 		file_path = '/'.join([input_path, f])
 		f_split = f.split('.')[0].split('_')[3:]
 		data = load_json(file_path)
 		organized_data 	 	= organize_peakmem_data(data=data)
-		label 				= f'mem_limit : {organized_data['mem_limit_MB']/1024} GB, \nshape_limit : {np.format_float_scientific(organized_data['shape_limit'], precision=4)}, xyz_limit : {np.format_float_scientific(organized_data['xyz_limit'], precision=4)}'
+		# label 				= f'mem_limit : {organized_data['mem_limit_MB']/1024} GB, \nshape_limit : {np.format_float_scientific(organized_data['shape_limit'], precision=4)}, xyz_limit : {np.format_float_scientific(organized_data['xyz_limit'], precision=4)}'
+		label 				= f'xyz_limit : {np.format_float_scientific(organized_data['xyz_limit'], precision=4)}'
 		# if organized_data['mem_limit_MB'] < 10*1024:
 		# 	continue
+		
 		tuple_data 			= (organized_data['N_segments'], organized_data['peak_memory_perbatch'], label, colors[i])
 		list_of_tuple_data.append(tuple_data)
 	output_file = '/'.join([input_path, 'peakmem_vs_Nsegments_dynamic_chunking_batching.png'])
-	overlay_plots(*list_of_tuple_data, title='Peak memory vs N_segments (with dynamic chunking and batching)', xlabel='N segments', ylabel='Peak Memory (MB)', output_file=output_file)
+	# overlay_plots(*list_of_tuple_data, title='Peak memory vs N_segments (with dynamic chunking and batching)', xlabel='N segments', ylabel='Peak Memory (MB)', output_file=output_file)
+	overlay_plots(*list_of_tuple_data, title='Peak memory vs N_segments', xlabel='N segments', ylabel='Peak Memory (MB)', output_file=output_file)
 
 if __name__=='__main__':
 	pass
