@@ -46,13 +46,16 @@ def get_runtime_perbatch(data: dict):
 	return organized_data
 
 def overlay_plots(*args, title, xlabel, ylabel,output_file=''):
-	plt.figure(figsize=(10, 6))
+	plt.figure(figsize=(10, 8))
 	for (x_data, y_data, label, color) in args:
 		plt.scatter(x_data, y_data, label=label, color=color, alpha=0.7)
-	plt.title(title)
-	plt.xlabel(xlabel)
-	plt.ylabel(ylabel)
-	plt.legend()
+	plt.xlabel(xlabel, fontsize=20)
+	plt.ylabel(ylabel, fontsize=20)
+	plt.title(title, fontsize=20)
+	plt.xticks(fontsize=20)
+	plt.yticks(fontsize=20)
+	plt.tight_layout()
+	plt.legend(loc='upper left', fontsize=15)
 	plt.grid(True)
 	plt.savefig(output_file)
 	plt.close()
@@ -68,13 +71,14 @@ def benchmark_runtime(input_path: str):
 	"""
 	list_files 				= [f for f in os.listdir(input_path) if f.endswith('.json')]
 	list_tuples 			= []
-	colors 					= ['red', 'green', 'black', 'purple', 'yellow', 'maroon']
+	colors 					= ['maroon', 'green', 'black', 'purple', 'red', 'blue', 'orange']
 	for i, f in enumerate(list_files):
 		file_path = '/'.join([input_path, f])
 		f_split = f.split('.')[0].split('_')[3:]
 		data = load_json(file_path)
 		organized_data 	 	= get_runtime_perbatch(data=data)
-		label 				= f'Batch size: {organized_data["batch_size"]}, \nnbchunk: {organized_data["nbchunk"]}, nbchunk_conv: {organized_data["nbchunk_conv"]}'
+		# label 				= f'Batch size: {organized_data["batch_size"]}, \nnbchunk: {organized_data["nbchunk"]}, nbchunk_conv: {organized_data["nbchunk_conv"]}'
+		label 				= f'nbchunk: {organized_data["nbchunk"]}, nbchunk_conv: {organized_data["nbchunk_conv"]}'
 		tuple_data 			= (organized_data['N_segments'], organized_data['runtimes_perbatch'], label, colors[i])
 		list_tuples.append(tuple_data)
 	output_file = '/'.join([input_path, 'runtime_vs_Nsegments.png'])
@@ -140,7 +144,7 @@ def get_runtime_majorOperations(data: dict):
 				drift.append(each_operation_runtime['drifter_sec'])
 				sum_current.append(each_operation_runtime['sum_current_sec'])
 				chunksum_readout.append(each_operation_runtime['chunksum_readout_sec'])
-				concat_readout.append(each_operation_runtime['concat_readout_sec'])
+				concat_readout.append(each_operation_runtime['concat_readout_sec']) # concatenating waveforms
 				formingBlock_readout_current.append(each_operation_runtime['formingBlock_readout_current_sec'])
 				chunking_conv_data = each_operation_runtime['chunking_conv']
 				for ichunk, chunkdata in chunking_conv_data.items():

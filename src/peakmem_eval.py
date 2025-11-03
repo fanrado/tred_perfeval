@@ -148,18 +148,18 @@ def benchmark_peak_memory_dynamic_chunking_and_batching(input_path: str):
 	"""
 	list_of_files 			= [f for f in os.listdir(input_path) if f.endswith('.json')]
 	list_of_tuple_data 		= []
-	colors 					= ['red', 'green', 'black', 'purple', 'yellow', 'maroon']
-	if len(list_of_files) > len(colors):
-		colors = []
-		for i in range(len(list_of_files)):
-			colors.append(np.random.rand(3,))
+	colors 					= ['red', 'green', 'black', 'purple', 'maroon', 'yellow']
+	# if len(list_of_files) > len(colors):
+	# 	colors = []
+	# 	for i in range(len(list_of_files)):
+	# 		colors.append(np.random.rand(3,))
 	for i, f in enumerate(list_of_files):
 		file_path = '/'.join([input_path, f])
 		f_split = f.split('.')[0].split('_')[3:]
 		data = load_json(file_path)
 		organized_data 	 	= organize_peakmem_data(data=data)
 		# label 				= f'mem_limit : {organized_data['mem_limit_MB']/1024} GB, \nshape_limit : {np.format_float_scientific(organized_data['shape_limit'], precision=4)}, xyz_limit : {np.format_float_scientific(organized_data['xyz_limit'], precision=4)}'
-		label 				= f'xyz_limit : {np.format_float_scientific(organized_data['xyz_limit'], precision=4)}'
+		label 				= f'xyz_limit : {organized_data['xyz_limit']}'
 		# if organized_data['mem_limit_MB'] < 10*1024:
 		# 	continue
 		
