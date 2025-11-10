@@ -39,7 +39,7 @@ def organize_peakmem_data(data: dict):
 				for key2, value2 in value1.items():
 					if not isinstance(value2, dict):
 						continue
-					print(value2.keys())
+					# print(value2.keys())
 					for key in ['mem_limit_MB', 'shape_limit', 'xyz_limit']:
 						if params_for_dynamic_chunking_batching[key] is None:
 							try:
@@ -80,7 +80,7 @@ def plot_peakmem_vs_nsegs(n_segments, peak_memory, title):
 	plt.savefig('peak_memory_vs_n_segments.png')
 	plt.close()
 
-def overlay_plots(*args, title='', xlabel='', ylabel='', output_file='overlay_plot.png'):
+def overlay_plots(*args, title='', xlabel='', ylabel='', output_file='overlay_plot.png', nodynChunkBatch=True):
 	"""
 	Overlay multiple plots on the same figure. One needs to provide in the title whether the dynamic chunking and batching are used.
 	If a comparison between with/without dynamic batching or chunking is made, it should be mentioned in the label.
@@ -93,15 +93,23 @@ def overlay_plots(*args, title='', xlabel='', ylabel='', output_file='overlay_pl
 		output_file (str): Filename to save the plot.
 	"""
 	plt.figure(figsize=(12,8))
+	i = 1
+	filled_markers = ['.', 'o', 'v', '*', '^', '<', '8', 's', 'p', 'h', 'H', 'D', 'd', 'P', 'X']
+	j = 0
 	for x_data, y_data, label, color in args:
-		plt.scatter(x_data, y_data, label=label, color=color, alpha=0.6, s=100)
+		if nodynChunkBatch:
+			plt.scatter(x_data, y_data, label=label, color=color, alpha=0.4, s=100)
+		else:
+			plt.scatter(x_data, y_data, label=label, color=color, alpha=0.4, s=100, marker=filled_markers[j])
+		i += 2
+		j+=1
 	plt.xlabel(xlabel, fontsize=20)
 	plt.ylabel(ylabel, fontsize=20)
 	plt.title(title, fontsize=20)
 	plt.xticks(fontsize=20)
 	plt.yticks(fontsize=20)
 	plt.tight_layout()
-	plt.legend(loc='upper right', fontsize=15)
+	plt.legend(loc='lower right', fontsize=15)
 	plt.grid(True)
 	plt.savefig(output_file)
 	plt.close()
@@ -140,7 +148,7 @@ def benchmark_peak_memory_nodynamic_chunking_and_batching(input_path: str):
 		# else:
 		tuple_data = (organized_data['N_segments'], organized_data['peak_memory_perbatch'], label, colors[i])
 		list_of_tuple_data.append(tuple_data)
-	overlay_plots(*list_of_tuple_data, title='Peak memory vs N_segments', xlabel='N segments', ylabel='Peak Memory (MB)', output_file='/'.join([input_path, 'peakmem_vs_Nsegments_nodynamic_chunking_batching.png']))
+	overlay_plots(*list_of_tuple_data, title='Peak memory vs N_segments', xlabel='N segments', ylabel='Peak Memory (MB)', output_file='/'.join([input_path, 'peakmem_vs_Nsegments_nodynamic_chunking_batching.png']), nodynChunkBatch=True)
 
 def benchmark_peak_memory_dynamic_chunking_and_batching(input_path: str):
 	"""
@@ -148,12 +156,15 @@ def benchmark_peak_memory_dynamic_chunking_and_batching(input_path: str):
 	"""
 	list_of_files 			= [f for f in os.listdir(input_path) if f.endswith('.json')]
 	list_of_tuple_data 		= []
-	colors 					= ['red', 'green', 'black', 'purple', 'maroon', 'yellow']
+	colors 					= ['red', 'green', 'blue', 'purple', 'maroon', 'orange', 'brown', 'pink', 'gray', 'olive', 'cyan']
 	# if len(list_of_files) > len(colors):
 	# 	colors = []
 	# 	for i in range(len(list_of_files)):
 	# 		colors.append(np.random.rand(3,))
 	for i, f in enumerate(list_of_files):
+		# if 'xyzLimit10_' in f:
+		# 	continue
+		print(f'Processing file: {f}')
 		file_path = '/'.join([input_path, f])
 		f_split = f.split('.')[0].split('_')[3:]
 		data = load_json(file_path)
@@ -167,7 +178,7 @@ def benchmark_peak_memory_dynamic_chunking_and_batching(input_path: str):
 		list_of_tuple_data.append(tuple_data)
 	output_file = '/'.join([input_path, 'peakmem_vs_Nsegments_dynamic_chunking_batching.png'])
 	# overlay_plots(*list_of_tuple_data, title='Peak memory vs N_segments (with dynamic chunking and batching)', xlabel='N segments', ylabel='Peak Memory (MB)', output_file=output_file)
-	overlay_plots(*list_of_tuple_data, title='Peak memory vs N_segments', xlabel='N segments', ylabel='Peak Memory (MB)', output_file=output_file)
+	overlay_plots(*list_of_tuple_data, title='Peak memory vs N_segments', xlabel='N segments', ylabel='Peak Memory (MB)', output_file=output_file, nodynChunkBatch=False)
 
 if __name__=='__main__':
 	pass
