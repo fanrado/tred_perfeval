@@ -13,6 +13,61 @@ def load_json(input_file=''):
 		data = json.load(f)
 	return data
 
+def effq_accuracy_eval_with_diffusion_cap():
+	'''
+	    Plot the distribution of deltaQ = EffQ - EffQ_ref and dQ_over_Q = (EffQ - EffQ_ref)/EffQ_ref.
+		A minimum value of the transverse spread is set set to 0.035 cm:
+			sigma_T = max( sqrt(2*D_T*t_drift), 0.035 cm )
+	'''
+	## Accuracy of the effective charge calculation ----
+	# root_path = '/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/ACC_EFFQ/preliminary/benchmark_plots'
+	root_path = "/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/ACC_EFFQ/cap_on_diffspread"
+
+	# initialize the variables to store the deltaQ and dQ_over_Q
+	deltaQ_10x10_4x4x2, dQ_over_Q_10x10_4x4x2 = None, None
+	deltaQ_8x8_2x2x2, dQ_over_Q_8x8_2x2x2 = None, None
+	deltaQ_6x6_2x2x2, dQ_over_Q_6x6_2x2x2 = None, None
+	readFrom_npz = False
+	getEffq = True  # Set to True to evaluate the effective charge accuracy, False for accumulated charge accuracy
+	cut_on_Q = 0.001 #0.01 # ke-
+	if readFrom_npz:
+		saveHDF5 = True
+
+		## DIFFERENT DIFFUSION COEFF
+		path_to_ref = '/'.join([root_path, '10x10_partitions_2x2x2_drifttime_nocut.npz'])
+		path_to_10x10_4x4x2 = '/'.join([root_path, '10x10_partitions_4x4x2_drifttime_nocut.npz'])
+		output_file_10x10_hdf5 = '/'.join([root_path, 'HDF5/EffectiveCharge_10x10_4x4x2.hdf5'])
+		acc_effq_eval.npz2hdf5(npz_data=path_to_10x10_4x4x2, npz_ref=path_to_ref, saveHDF5=saveHDF5, output_hdf5=output_file_10x10_hdf5, getEffq=getEffq)
+
+		# path_to_ref = '/'.join([root_path, '10x10_partitions_2x2x2_DT88cm2.npz'])
+		# path_to_10x10_4x4x2_DT88cm2 = '/'.join([root_path, '10x10_partitions_4x4x2_DT88cm2.npz'])
+		# output_file_10x10_DT88cm2_hdf5 = '/'.join([root_path, 'HDF5_coarse_grain_cut_0pt01ke_DT88cm2/EffectiveCharge_10x10_4x4x2_DT88cm2.hdf5'])
+		# acc_effq_eval.npz2hdf5(npz_data=path_to_10x10_4x4x2_DT88cm2, npz_ref=path_to_ref, saveHDF5=saveHDF5, output_hdf5=output_file_10x10_DT88cm2_hdf5, getEffq=getEffq)
+
+	else:
+
+		hdf5_file_10x10 = '/'.join([root_path, 'HDF5/EffectiveCharge_10x10_4x4x2.hdf5'])
+		# hdf5_file_10x10_DT88cm2 = '/'.join([root_path, 'HDF5_coarse_grain_cut_0pt01ke_DT88cm2/EffectiveCharge_10x10_4x4x2_DT88cm2.hdf5'])
+		deltaQ_10x10_4x4x2, dQ_over_Q_10x10_4x4x2, high_dQ_over_Q_10x10, Npix_tot_10x10, Npix_belowthr_10x10 = acc_effq_eval.load_Q_fromHDF5(hdf5_file=hdf5_file_10x10, cut_on_Qref=cut_on_Q, getEffq=getEffq)
+
+		# deltaQ_10x10_4x4x2_DT88cm2, dQ_over_Q_10x10_4x4x2_DT88cm2, high_dQ_over_Q_10x10_DT88cm2, Npix_tot_10x1_DT88cm2, Npix_belowthr_10x10_DT88cm2 = acc_effq_eval.load_Q_fromHDF5(hdf5_file=hdf5_file_10x10_DT88cm2, cut_on_Qref=cut_on_Q, getEffq=getEffq)
+
+		## DIFFERENT DIFFUSION COEFF
+		delta_Q_list = [(deltaQ_10x10_4x4x2, '(4,4,2) x (10,10)', 'blue')]
+						# (deltaQ_8x8_2x2x2, '(2,2,2) x (8,8)', 'green'),
+						# (deltaQ_6x6_2x2x2, '(2,2,2) x (6,6)', 'blue')]
+		output_file = '/'.join([root_path, 'HDF5/deltaQ_overlay_10x10_8x8_6x6.png'])
+		acc_effq_eval.overlay_hists_deltaQ(*delta_Q_list, title='Effective charge distributions wrt (4,4,2) x (10,10)', xlabel='Delta Q [ke-]', ylabel='Counts', output_file=output_file)
+
+		dQ_over_Q_list = [(dQ_over_Q_10x10_4x4x2, '(4,4,2) x (10,10)', 'blue')]
+						# (dQ_over_Q_8x8_2x2x2, '(2,2,2) x (8,8)', 'green'),
+						# (dQ_over_Q_6x6_2x2x2, '(2,2,2) x (6,6)', 'blue'),]
+						
+		output_file = '/'.join([root_path, 'HDF5/dQ_over_Q_overlay_10x10_8x8_6x6.png'])
+		# output_file = '/'.join([root_path, 'test.png'])
+		acc_effq_eval.overlay_hists_deltaQ(*dQ_over_Q_list, title='Relative difference of the charges at each pixel', xlabel=r'$(Q-Q_{ref})/Q_{ref}$', ylabel='Counts', output_file=output_file)
+
+
 def memory_evaluation():
 	# Peak memory usage ----
 	# input_dir = '/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/MEMORY_EVAL/preliminary/no_dynBatchChunk/benchmark_plot'
@@ -139,15 +194,15 @@ def effq_accuracy_eval_diffent_diffCoeff():
 		deltaQ_10x10_4x4x2_DT88cm2, dQ_over_Q_10x10_4x4x2_DT88cm2, high_dQ_over_Q_10x10_DT88cm2, Npix_tot_10x1_DT88cm2, Npix_belowthr_10x10_DT88cm2 = acc_effq_eval.load_Q_fromHDF5(hdf5_file=hdf5_file_10x10_DT88cm2, cut_on_Qref=cut_on_Q, getEffq=getEffq)
 
 		## DIFFERENT DIFFUSION COEFF
-		delta_Q_list = [(deltaQ_10x10_4x4x2, '(4,4,2) x (10,10), 8.8 cm2/s Transverse diff coeff', 'red'), #, 8.8 cm2 Transversal diff coeff
-				  		(deltaQ_10x10_4x4x2_DT88cm2, '(4,4,2) x (10,10), 88 cm2/s Transverse diff coeff', 'green'),]
+		delta_Q_list = [(deltaQ_10x10_4x4x2, '(4,4,2) x (10,10), 8.8 cm2/us Transverse diff coeff', 'red'), #, 8.8 cm2 Transversal diff coeff
+				  		(deltaQ_10x10_4x4x2_DT88cm2, '(4,4,2) x (10,10), 88 cm2/us Transverse diff coeff', 'green'),]
 						# (deltaQ_8x8_2x2x2, '(2,2,2) x (8,8)', 'green'),
 						# (deltaQ_6x6_2x2x2, '(2,2,2) x (6,6)', 'blue')]
 		output_file = '/'.join([root_path, 'HDF5_coarse_grain_cut_0pt01ke_DT88cm2/deltaQ_overlay_10x10_8x8_6x6.png'])
 		acc_effq_eval.overlay_hists_deltaQ(*delta_Q_list, title='Effective charge distributions wrt (2,2,2) x (10,10)', xlabel='Delta Q [ke-]', ylabel='Counts', output_file=output_file)
 
-		dQ_over_Q_list = [(dQ_over_Q_10x10_4x4x2, '(4,4,2) x (10,10), 8.8 cm2/s Transverse diff coeff', 'red'), #, 8.8 cm2 Transversal diff coeff
-						(dQ_over_Q_10x10_4x4x2_DT88cm2, '(4,4,2) x (10,10), 88 cm2/s Transverse diff coeff', 'green')]
+		dQ_over_Q_list = [(dQ_over_Q_10x10_4x4x2, '(4,4,2) x (10,10), 8.8 cm2/us Transverse diff coeff', 'red'), #, 8.8 cm2 Transversal diff coeff
+						(dQ_over_Q_10x10_4x4x2_DT88cm2, '(4,4,2) x (10,10), 88 cm2/us Transverse diff coeff', 'green')]
 						# (dQ_over_Q_8x8_2x2x2, '(2,2,2) x (8,8)', 'green'),
 						# (dQ_over_Q_6x6_2x2x2, '(2,2,2) x (6,6)', 'blue'),]
 						
@@ -362,8 +417,9 @@ def separation_by_time():
 	
 if __name__ == '__main__':
 	# separation_by_time()
-	effq_accuracy_eval_cuton_drifttime()
+	# effq_accuracy_eval_cuton_drifttime()
 	# effq_accuracy_eval_cuton_loctime()
 	# effq_accuracy_eval_diffent_diffCoeff()
+	effq_accuracy_eval_with_diffusion_cap()
 	# runtime_evaluation()
 	# memory_evaluation()
