@@ -266,7 +266,6 @@ def load_Q_fromHDF5(hdf5_file='', cut_on_Qref=1, getEffq=False): # ke-
 			Q_allTPCs (dict): Dictionary of Q arrays per TPC.
 			Qref_allTPCs (dict): Dictionary of Q_ref arrays per TPC.
 	"""
-
 	metric_name = 'accumulated_charge'
 	if getEffq:
 		metric_name = 'effective_charge'
@@ -277,7 +276,7 @@ def load_Q_fromHDF5(hdf5_file='', cut_on_Qref=1, getEffq=False): # ke-
 	high_dQ_over_Q_allTPCs = {f'tpc{i}': {'dQ_over_Q': [], 'pixel_locs': []} for i in range(70)}
 	
 	##--- Plot Q vs Qref ----
-	cut_on_deltaQ = 0.01#2 # ke-
+	cut_on_deltaQ = 1e-4#2 # ke-
 	Q_array = np.array([], dtype=np.float32)
 	Qref_array = np.array([], dtype=np.float32)
 	####
@@ -312,7 +311,9 @@ def load_Q_fromHDF5(hdf5_file='', cut_on_Qref=1, getEffq=False): # ke-
 					Q_array = np.concatenate((Q_array, np.array([charge_in_data], dtype=np.float32)), axis=0)
 					Qref_array = np.concatenate((Qref_array, np.array([charge_in_ref], dtype=np.float32)), axis=0)
 
-				if all_Qref[i] < cut_on_Qref:
+				# if all_Qref[i] < cut_on_Qref:
+				# 	continue
+				if charge_in_ref < cut_on_Qref:
 					continue
 				dQ_overQ = (charge_in_data - charge_in_ref) / charge_in_ref
 				# dQ_over_Q_allTPCs[itpc].append((charge_in_data - charge_in_ref) / charge_in_ref)
@@ -401,6 +402,7 @@ def overlay_hists_deltaQ(*deltaQ_list, title, xlabel, ylabel, output_file=''):
 	plt.ylabel(ylabel, fontsize=18)
 	plt.yscale('log')
 	# plt.xlim([-2, 5])
+	# plt.xlim([-0.15, 0])
 	plt.xticks(fontsize=18)
 	plt.yticks(fontsize=18)
 	plt.title(title, fontsize=18)
