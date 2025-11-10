@@ -277,7 +277,7 @@ def load_Q_fromHDF5(hdf5_file='', cut_on_Qref=1, getEffq=False): # ke-
 	high_dQ_over_Q_allTPCs = {f'tpc{i}': {'dQ_over_Q': [], 'pixel_locs': []} for i in range(70)}
 	
 	##--- Plot Q vs Qref ----
-	cut_on_deltaQ = 2 # ke-
+	cut_on_deltaQ = 0.01#2 # ke-
 	Q_array = np.array([], dtype=np.float32)
 	Qref_array = np.array([], dtype=np.float32)
 	####
@@ -308,7 +308,7 @@ def load_Q_fromHDF5(hdf5_file='', cut_on_Qref=1, getEffq=False): # ke-
 				charge_in_ref = all_Qref[i]
 				deltaQ_ = charge_in_data - charge_in_ref
 				deltaQ_allTPCs[itpc].append(deltaQ_)
-				if np.abs(deltaQ_) > cut_on_deltaQ: # collect Q and Qref for deltaQ distribution plot
+				if np.abs(deltaQ_) > cut_on_deltaQ: # collect Q and Qref for Q distribution plot
 					Q_array = np.concatenate((Q_array, np.array([charge_in_data], dtype=np.float32)), axis=0)
 					Qref_array = np.concatenate((Qref_array, np.array([charge_in_ref], dtype=np.float32)), axis=0)
 
@@ -329,18 +329,20 @@ def load_Q_fromHDF5(hdf5_file='', cut_on_Qref=1, getEffq=False): # ke-
 			high_dQ_over_Q_allTPCs[itpc]['dQ_over_Q'] = np.array(high_dQ_over_Q_allTPCs[itpc]['dQ_over_Q'], dtype=np.float32)
 			high_dQ_over_Q_allTPCs[itpc]['pixel_locs'] = np.array(high_dQ_over_Q_allTPCs[itpc]['pixel_locs'], dtype=np.int32)
 	# sys.exit()
-	plot_dist = True
+	plot_dist = False
 	if plot_dist:
 		xlabel = 'Accumulated Charge'
 		if getEffq:
 			xlabel = 'Effective Charge'
 		title = hdf5_file.split('/')[-1].replace('.hdf5', '')
-		list_Q = [(Q_allTPCs, 'Q', 'blue'), (Qref_allTPCs, r'$Q_{ref}$', 'orange')]
+		list_Q = [(Q_allTPCs, 'Q, DT = 88 cm2/s', 'blue'), (Qref_allTPCs, r'$Q_{ref}$, DT = 8.8 cm2/s', 'orange')]
 		output_file = hdf5_file.replace('.hdf5', '_Q_distribution.png')
 		overlay_hists_deltaQ(*list_Q, title=title, xlabel=f'{xlabel} [ke-]', ylabel='Counts', output_file=output_file)
 	
 	plot_Q_vs_Qref = True
 	if plot_Q_vs_Qref:
+		print(Q_array, Qref_array)
+		title = hdf5_file.split('/')[-1].replace('.hdf5', '')
 		# Calculate the range of your data
 		x_min, x_max = np.min(Q_array), np.max(Q_array)
 		y_min, y_max = np.min(Qref_array), np.max(Qref_array)
