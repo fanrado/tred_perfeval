@@ -1,6 +1,7 @@
 import os, sys, json
 import numpy as np
 import matplotlib.pyplot as plt
+import mplhep as hep
 
 def get_runtime_perbatch(data: dict):
 	"""
@@ -47,8 +48,10 @@ def get_runtime_perbatch(data: dict):
 
 def overlay_plots(*args, title, xlabel, ylabel,output_file=''):
 	plt.figure(figsize=(10, 8))
-	for (x_data, y_data, label, color) in args:
-		plt.scatter(x_data, y_data, label=label, color=color, alpha=0.7)
+	hep.style.use("CMS") 
+	filled_markers = ['.', '<', '+', '*', '^', '<', '8', 's', 'p', 'h', 'H', 'D', 'd', 'P', 'X']
+	for i,(x_data, y_data, label, color) in enumerate(args):
+		plt.scatter(x_data, y_data,label=label, color=color, alpha=0.7, marker=filled_markers[i], s=50)
 	plt.xlabel(xlabel, fontsize=20)
 	plt.ylabel(ylabel, fontsize=20)
 	plt.title(title, fontsize=20)
@@ -79,7 +82,13 @@ def benchmark_runtime(input_path: str):
 		organized_data 	 	= get_runtime_perbatch(data=data)
 		# label 				= f'Batch size: {organized_data["batch_size"]}, \nnbchunk: {organized_data["nbchunk"]}, nbchunk_conv: {organized_data["nbchunk_conv"]}'
 		label 				= f'nbchunk: {organized_data["nbchunk"]}, nbchunk_conv: {organized_data["nbchunk_conv"]}'
-		tuple_data 			= (organized_data['N_segments'], organized_data['runtimes_perbatch'], label, colors[i])
+		# tuple_data 			= (organized_data['N_segments'], organized_data['runtimes_perbatch'], label, colors[i])
+		x_data = organized_data['N_segments']
+		y_data = organized_data['runtimes_perbatch']
+		sort_indices = np.argsort(x_data)
+		x_sorted = np.array(x_data)[sort_indices]
+		y_sorted = np.array(y_data)[sort_indices]
+		tuple_data = (x_sorted, y_sorted, label, colors[i])
 		list_tuples.append(tuple_data)
 	output_file = '/'.join([input_path, 'runtime_vs_Nsegments.png'])
 	overlay_plots(*list_tuples, title='Runtime vs N_segments', xlabel='N segments', ylabel='Runtime (sec)', output_file=output_file)
