@@ -122,11 +122,8 @@ def get_chunksum_runtime(data_json: dict):
 	}
 	return Runtime_summary
 
-if __name__=='__main__':
-	path_to_file = '/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/CHUNKSUM_EVAL'
+def get_runtime_chunksum_qblock(path_to_file: str, output_path: str):
 	list_json = [f for f in os.listdir(path_to_file) if f.endswith('.json')]
-	##
-	## chunksum current
 	Nbins 	= []
 	t_mean 	= []
 	t_std 	= []
@@ -143,7 +140,7 @@ if __name__=='__main__':
 	t_std_sorted = [t_std[i] for i in sorted_indices]
 	plt.figure(figsize=(10, 8))
 	hep.style.use("CMS") 
-	plt.errorbar(Nbins_sorted, t_mean_sorted, yerr=t_std_sorted, fmt='o--', ecolor='r', capsize=5, label=r'Mean $\pm stdev$')
+	plt.errorbar(Nbins_sorted, t_mean_sorted, yerr=t_std_sorted, fmt='o', ecolor='r', capsize=5, label=r'Mean $\pm stdev$')
 	plt.xlabel('Number of bins in chunksum_qblock', fontsize=20)
 	plt.ylabel('Runtime (sec)', fontsize=20)
 	plt.title('Chunksum_qblock Runtime vs Number of bins', fontsize=20)
@@ -152,5 +149,102 @@ if __name__=='__main__':
 	plt.legend(fontsize=15)
 	plt.grid(True)
 	plt.tight_layout()
-	plt.savefig('../tests/chunksum_qblock_runtime_vs_Nbins.png')
+	plt.savefig(f'{output_path}/chunksum_qblock_runtime_vs_Nbins.png')
 	plt.close()
+
+def get_runtime_chunksum_i(path_to_file: str, output_path: str):
+	list_json = [f for f in os.listdir(path_to_file) if f.endswith('.json')]
+	Nbins 	= []
+	t_mean 	= []
+	t_std 	= []
+	for f in list_json:
+		runtime = get_chunksum_runtime(data_json=load_json(os.path.join(path_to_file, f)))
+		if runtime['Nbin_chunksum_i'] not in Nbins:
+			Nbins.append(runtime['Nbin_chunksum_i'])
+			t_mean.append(runtime['runtime_chunksum_i_sec_mean'])
+			t_std.append(runtime['runtime_chunksum_i_sec_std'])
+	Nbins_dict = {index: Nbin for index, Nbin in enumerate(Nbins)}
+	sorted_indices = sorted(Nbins_dict, key=Nbins_dict.get)
+	Nbins_sorted = [Nbins_dict[i] for i in sorted_indices]
+	t_mean_sorted = [t_mean[i] for i in sorted_indices]
+	t_std_sorted = [t_std[i] for i in sorted_indices]
+	plt.figure(figsize=(10, 8))
+	hep.style.use("CMS") 
+	plt.errorbar(Nbins_sorted, t_mean_sorted, yerr=t_std_sorted, fmt='o', ecolor='r', capsize=5, label=r'Mean $\pm stdev$')
+	plt.xlabel('Number of bins in chunksum_current', fontsize=20)
+	plt.ylabel('Runtime (sec)', fontsize=20)
+	plt.title('Chunksum_current Runtime vs Number of bins', fontsize=20)
+	plt.xticks(fontsize=15)
+	plt.yticks(fontsize=15)
+	plt.legend(fontsize=15)
+	plt.grid(True)
+	plt.tight_layout()
+	plt.savefig(f'{output_path}/chunksum_current_runtime_vs_Nbins.png')
+	plt.close()
+
+def get_runtime_chunksum_readout(path_to_file: str, output_path: str):
+	list_json = [f for f in os.listdir(path_to_file) if f.endswith('.json')]
+	Nbins 	= []
+	t_mean 	= []
+	t_std 	= []
+	for f in list_json:
+		runtime = get_chunksum_runtime(data_json=load_json(os.path.join(path_to_file, f)))
+		if runtime['Nbin_chunksum_readout'] not in Nbins:
+			print(runtime['Nbin_chunksum_readout'], runtime['runtime_chunksum_readout_sec_mean'])
+			Nbins.append(runtime['Nbin_chunksum_readout'])
+			t_mean.append(runtime['runtime_chunksum_readout_sec_mean'])
+			t_std.append(runtime['runtime_chunksum_readout_sec_std'])
+	Nbins_dict = {index: Nbin for index, Nbin in enumerate(Nbins)}
+	sorted_indices = sorted(Nbins_dict, key=Nbins_dict.get)
+	Nbins_sorted = [Nbins_dict[i] for i in sorted_indices]
+	t_mean_sorted = [t_mean[i] for i in sorted_indices]
+	t_std_sorted = [t_std[i] for i in sorted_indices]
+	plt.figure(figsize=(10, 8))
+	hep.style.use("CMS") 
+	plt.errorbar(Nbins_sorted, t_mean_sorted, yerr=t_std_sorted, fmt='o', ecolor='r', capsize=5, label=r'Mean $\pm stdev$')
+	plt.xlabel('Number of bins in chunksum_readout', fontsize=20)
+	plt.ylabel('Runtime (sec)', fontsize=20)
+	plt.title('Chunksum_readout Runtime vs Number of bins', fontsize=20)
+	plt.xticks(fontsize=15)
+	plt.yticks(fontsize=15)
+	plt.legend(fontsize=15)
+	plt.grid(True)
+	plt.tight_layout()
+	plt.savefig(f'{output_path}/chunksum_readout_runtime_vs_Nbins.png')
+	plt.close()
+
+if __name__=='__main__':
+	path_to_file = '/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/CHUNKSUM_EVAL'
+	# list_json = [f for f in os.listdir(path_to_file) if f.endswith('.json')]
+	# ##
+	# ## chunksum current
+	# Nbins 	= []
+	# t_mean 	= []
+	# t_std 	= []
+	# for f in list_json:
+	# 	runtime = get_chunksum_runtime(data_json=load_json(os.path.join(path_to_file, f)))
+	# 	if runtime['Nbin_chunksum_qblock'] not in Nbins:
+	# 		Nbins.append(runtime['Nbin_chunksum_qblock'])
+	# 		t_mean.append(runtime['runtime_chunksum_qblock_sec_mean'])
+	# 		t_std.append(runtime['runtime_chunksum_qblock_sec_std'])
+	# Nbins_dict = {index: Nbin for index, Nbin in enumerate(Nbins)}
+	# sorted_indices = sorted(Nbins_dict, key=Nbins_dict.get)
+	# Nbins_sorted = [Nbins_dict[i] for i in sorted_indices]
+	# t_mean_sorted = [t_mean[i] for i in sorted_indices]
+	# t_std_sorted = [t_std[i] for i in sorted_indices]
+	# plt.figure(figsize=(10, 8))
+	# hep.style.use("CMS") 
+	# plt.errorbar(Nbins_sorted, t_mean_sorted, yerr=t_std_sorted, fmt='o--', ecolor='r', capsize=5, label=r'Mean $\pm stdev$')
+	# plt.xlabel('Number of bins in chunksum_qblock', fontsize=20)
+	# plt.ylabel('Runtime (sec)', fontsize=20)
+	# plt.title('Chunksum_qblock Runtime vs Number of bins', fontsize=20)
+	# plt.xticks(fontsize=15)
+	# plt.yticks(fontsize=15)
+	# plt.legend(fontsize=15)
+	# plt.grid(True)
+	# plt.tight_layout()
+	# plt.savefig('../tests/chunksum_qblock_runtime_vs_Nbins.png')
+	# plt.close()
+	get_runtime_chunksum_qblock(path_to_file=path_to_file, output_path='../tests/')
+	get_runtime_chunksum_i(path_to_file=path_to_file, output_path='../tests/')
+	get_runtime_chunksum_readout(path_to_file=path_to_file, output_path='../tests/')
