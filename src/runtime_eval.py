@@ -52,6 +52,11 @@ def overlay_plots(*args, title, xlabel, ylabel,output_file=''):
 	filled_markers = ['.', '<', '+', '*', '^', '<', '8', 's', 'p', 'h', 'H', 'D', 'd', 'P', 'X']
 	for i,(x_data, y_data, label, color) in enumerate(args):
 		plt.scatter(x_data, y_data,label=label, color=color, alpha=0.7, marker=filled_markers[i], s=50)
+		# coeffs = np.polyfit(x_data, y_data, 1)
+		# poly_func = np.poly1d(coeffs)
+		# x_fit = np.linspace(min(x_data), max(x_data), 100)
+		# y_fit = poly_func(x_fit)
+		# plt.plot(x_fit, y_fit, color=color, linestyle='--', alpha=0.7)
 	plt.xlabel(xlabel, fontsize=20)
 	plt.ylabel(ylabel, fontsize=20)
 	plt.title(title, fontsize=20)
