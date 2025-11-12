@@ -76,8 +76,9 @@ def memory_evaluation():
 	peakmem_eval.benchmark_peak_memory_nodynamic_chunking_and_batching(input_path=input_dir)
 	# input_dir = "/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/MEMORY_EVAL/benchmark_plot_dynChunkBatch/files_plot"
 	# input_dir = '/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/MEMORY_EVAL/benchmark_plot_dynChunkBatch/files_plot'
-	input_dir = '/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/MEMORY_EVAL/benchmark_plot_dynChunkBatch_xyzlim'
-	peakmem_eval.benchmark_peak_memory_dynamic_chunking_and_batching(input_path=input_dir)
+	# #
+	# input_dir = '/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/MEMORY_EVAL/benchmark_plot_dynChunkBatch_xyzlim'
+	# peakmem_eval.benchmark_peak_memory_dynamic_chunking_and_batching(input_path=input_dir)
 
 def runtime_evaluation():
 	## Runtime evaluation ----
@@ -96,7 +97,8 @@ def runtime_evaluation():
 	runtime_eval.benchmark_runtime(input_path=input_dir)
 
 def effq_accuracy_eval_cuton_drifttime():
-	root_path = "/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/ACC_EFFQ/cut_on_drifttime_30_100_nocut_event1003"
+	# root_path = "/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/ACC_EFFQ/cut_on_drifttime_30_100_nocut_event1003"
+	root_path = "/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/ACC_EFFQ/November10_2025/CUT_on_TDRIFT"
 
 	# initialize the variables to store the deltaQ and dQ_over_Q
 	deltaQ_10x10_4x4x2, dQ_over_Q_10x10_4x4x2 = None, None
@@ -109,46 +111,51 @@ def effq_accuracy_eval_cuton_drifttime():
 		saveHDF5 = True
 		##
 		## SAME DIFFUSION COEFF
-		path_to_ref = '/'.join([root_path, '10x10_partitions_2x2x2_drifttime_lessthan30.npz'])
-		path_to_10x10_4x4x2 = '/'.join([root_path, '10x10_partitions_4x4x2_drifttime_lessthan30.npz'])
-		output_file_10x10_hdf5 = '/'.join([root_path, 'HDF5/EffectiveCharge_10x10_4x4x2_drifttime_lessthan30.hdf5'])
+		path_to_ref = '/'.join([root_path, '2x2x2/2x2x2_tdrift10.npz'])
+		path_to_10x10_4x4x2 = '/'.join([root_path, '4x4x2/4x4x2_tdrift10.npz'])
+		output_file_10x10_hdf5 = '/'.join([root_path, 'HDF5/EffectiveCharge_10x10_4x4x2_tdrift10.hdf5'])
 		acc_effq_eval.npz2hdf5(npz_data=path_to_10x10_4x4x2, npz_ref=path_to_ref, saveHDF5=saveHDF5, output_hdf5=output_file_10x10_hdf5, getEffq=getEffq)
 
-		path_to_ref = '/'.join([root_path, '10x10_partitions_2x2x2_drifttime_morethan100.npz'])
-		path_to_10x10_4x4x2_DT88cm2 = '/'.join([root_path, '10x10_partitions_4x4x2_drifttime_morethan100.npz'])
-		output_file_10x10_DT88cm2_hdf5 = '/'.join([root_path, 'HDF5/EffectiveCharge_10x10_4x4x2_drifttime_morethan100.hdf5'])
-		acc_effq_eval.npz2hdf5(npz_data=path_to_10x10_4x4x2_DT88cm2, npz_ref=path_to_ref, saveHDF5=saveHDF5, output_hdf5=output_file_10x10_DT88cm2_hdf5, getEffq=getEffq)
+		# path_to_ref = '/'.join([root_path, '10x10_partitions_2x2x2_drifttime_morethan100.npz'])
+		# path_to_10x10_4x4x2_DT88cm2 = '/'.join([root_path, '10x10_partitions_4x4x2_drifttime_morethan100.npz'])
+		# output_file_10x10_DT88cm2_hdf5 = '/'.join([root_path, 'HDF5/EffectiveCharge_10x10_4x4x2_drifttime_morethan100.hdf5'])
+		# acc_effq_eval.npz2hdf5(npz_data=path_to_10x10_4x4x2_DT88cm2, npz_ref=path_to_ref, saveHDF5=saveHDF5, output_hdf5=output_file_10x10_DT88cm2_hdf5, getEffq=getEffq)
 
-		# no cut 
-		path_to_ref_nocut = '/'.join([root_path, '10x10_partitions_2x2x2_drifttime_nocut.npz'])
-		path_to_10x10_4x4x2_nocut = '/'.join([root_path, '10x10_partitions_4x4x2_drifttime_nocut.npz'])
-		output_file_10x10_nocut_hdf5 = '/'.join([root_path, 'HDF5/EffectiveCharge_10x10_4x4x2_nocut.hdf5'])
-		acc_effq_eval.npz2hdf5(npz_data=path_to_10x10_4x4x2_nocut, npz_ref=path_to_ref_nocut, saveHDF5=saveHDF5, output_hdf5=output_file_10x10_nocut_hdf5, getEffq=getEffq)
+		# # no cut 
+		# path_to_ref_nocut = '/'.join([root_path, '10x10_partitions_2x2x2_drifttime_nocut.npz'])
+		# path_to_10x10_4x4x2_nocut = '/'.join([root_path, '10x10_partitions_4x4x2_drifttime_nocut.npz'])
+		# output_file_10x10_nocut_hdf5 = '/'.join([root_path, 'HDF5/EffectiveCharge_10x10_4x4x2_nocut.hdf5'])
+		# acc_effq_eval.npz2hdf5(npz_data=path_to_10x10_4x4x2_nocut, npz_ref=path_to_ref_nocut, saveHDF5=saveHDF5, output_hdf5=output_file_10x10_nocut_hdf5, getEffq=getEffq)
 
 	else:
-		hdf5_file_10x10_drifttime_lessthan30 = '/'.join([root_path, 'HDF5/EffectiveCharge_10x10_4x4x2_drifttime_lessthan30.hdf5'])
-		hdf5_file_10x10_drifttime_morethan100 = '/'.join([root_path, 'HDF5/EffectiveCharge_10x10_4x4x2_drifttime_morethan100.hdf5'])
-		hdf5_file_10x10_drifttime_nocut = '/'.join([root_path, 'HDF5/EffectiveCharge_10x10_4x4x2_nocut.hdf5'])
+		hdf5_file_10x10_drifttime_10us = '/'.join([root_path, 'HDF5/EffectiveCharge_10x10_4x4x2_tdrift10.hdf5'])
+		hdf5_file_10x10_drifttime_30us = '/'.join([root_path, 'HDF5/EffectiveCharge_10x10_4x4x2_tdrift30.hdf5'])
+		hdf5_file_10x10_drifttime_20us = '/'.join([root_path, 'HDF5/EffectiveCharge_10x10_4x4x2_tdrift20.hdf5'])
+		hdf5_file_10x10_drifttime_60us = '/'.join([root_path, 'HDF5/EffectiveCharge_10x10_4x4x2_tdrift60.hdf5'])
 
-		deltaQ_10x10_4x4x2_drifttime_lessthan30, dQ_over_Q_10x10_4x4x2_drifttime_lessthan30, high_dQ_over_Q_10x10, Npix_tot_10x10, Npix_belowthr_10x10 = acc_effq_eval.load_Q_fromHDF5(hdf5_file=hdf5_file_10x10_drifttime_lessthan30, cut_on_Qref=cut_on_Q, getEffq=getEffq)
+		deltaQ_10x10_4x4x2_drifttime_10us, dQ_over_Q_10x10_4x4x2_drifttime_10us, high_dQ_over_Q_10x10, Npix_tot_10x10, Npix_belowthr_10x10 = acc_effq_eval.load_Q_fromHDF5(hdf5_file=hdf5_file_10x10_drifttime_10us, cut_on_Qref=cut_on_Q, getEffq=getEffq)
 
-		deltaQ_10x10_4x4x2_drifttime_morethan100, dQ_over_Q_10x10_4x4x2_drifttime_morethan100, high_dQ_over_Q_10x10_DT88cm2, Npix_tot_10x1_DT88cm2, Npix_belowthr_10x10_DT88cm2 = acc_effq_eval.load_Q_fromHDF5(hdf5_file=hdf5_file_10x10_drifttime_morethan100, cut_on_Qref=cut_on_Q, getEffq=getEffq)
+		deltaQ_10x10_4x4x2_drifttime_30us, dQ_over_Q_10x10_4x4x2_drifttime_30us, high_dQ_over_Q_10x10_DT88cm2, Npix_tot_10x1_DT88cm2, Npix_belowthr_10x10_DT88cm2 = acc_effq_eval.load_Q_fromHDF5(hdf5_file=hdf5_file_10x10_drifttime_30us, cut_on_Qref=cut_on_Q, getEffq=getEffq)
 
-		deltaQ_10x10_4x4x2_notcut, dQ_over_Q_10x10_4x4x2_nocut, high_dQ_over_Q_10x10_nocut, Npix_tot_10x10_nocut, Npix_belowthr_10x10_nocut = acc_effq_eval.load_Q_fromHDF5(hdf5_file=hdf5_file_10x10_drifttime_nocut, cut_on_Qref=cut_on_Q, getEffq=getEffq)
+		deltaQ_10x10_4x4x2_drifttime_20us, dQ_over_Q_10x10_4x4x2_drifttime_20us, _, _, _ = acc_effq_eval.load_Q_fromHDF5(hdf5_file=hdf5_file_10x10_drifttime_20us, cut_on_Qref=cut_on_Q, getEffq=getEffq)
+
+		deltaQ_10x10_4x4x2_drifttime_60us, dQ_over_Q_10x10_4x4x2_drifttime_60us, high_dQ_over_Q_10x10_nocut, Npix_tot_10x10_nocut, Npix_belowthr_10x10_nocut = acc_effq_eval.load_Q_fromHDF5(hdf5_file=hdf5_file_10x10_drifttime_60us, cut_on_Qref=cut_on_Q, getEffq=getEffq)
 
 		## SAME DIFFUSION COEFF
-		delta_Q_list = [(deltaQ_10x10_4x4x2_drifttime_lessthan30, '(4,4,2) x (10,10), drift time < 30 us', 'red'), #, 8.8 cm2 Transversal diff coeff
-				  		(deltaQ_10x10_4x4x2_drifttime_morethan100, '(4,4,2) x (10,10), drift time > 100 us', 'green'),
-						  (deltaQ_10x10_4x4x2_notcut, '(4,4,2) x (10,10), No cut', 'blue')]
+		delta_Q_list = [(deltaQ_10x10_4x4x2_drifttime_10us, '(4,4,2) x (10,10), drift time < 10 us', 'red', None),#, 8.8 cm2 Transversal diff coeff
+				  		(deltaQ_10x10_4x4x2_drifttime_30us, '(4,4,2) x (10,10), drift time < 30 us', 'green', '--'),
+						  (deltaQ_10x10_4x4x2_drifttime_60us, '(4,4,2) x (10,10), drift time < 60 us', 'purple', None),
+						  (deltaQ_10x10_4x4x2_drifttime_20us, '(4,4,2) x (10,10), drift time < 20 us', 'blue', ':')]
 						# (deltaQ_8x8_2x2x2, '(2,2,2) x (8,8)', 'green'),
 						# (deltaQ_6x6_2x2x2, '(2,2,2) x (6,6)', 'blue')]
 		output_file = '/'.join([root_path, 'HDF5/deltaQ_overlay_10x10_8x8_6x6.png'])
 		acc_effq_eval.overlay_hists_deltaQ(*delta_Q_list, title='Effective charge distributions wrt (2,2,2) x (10,10)', xlabel='Delta Q [ke-]', ylabel='Counts', output_file=output_file)
 
-		dQ_over_Q_list = [(dQ_over_Q_10x10_4x4x2_drifttime_lessthan30, '(4,4,2) x (10,10), drift time < 30 us', 'red'), #, 8.8 cm2 Transversal diff coeff
-						(dQ_over_Q_10x10_4x4x2_drifttime_morethan100, '(4,4,2) x (10,10), drift time > 100 us', 'green'),
-						(dQ_over_Q_10x10_4x4x2_nocut, '(4,4,2) x (10,10), No cut', 'blue')]
-						# (dQ_over_Q_8x8_2x2x2, '(2,2,2) x (8,8)', 'green'),
+		dQ_over_Q_list = [(dQ_over_Q_10x10_4x4x2_drifttime_10us, '(4,4,2) x (10,10), drift time < 10 us', 'red', None), #, 8.8 cm2 Transversal diff coeff
+						(dQ_over_Q_10x10_4x4x2_drifttime_30us, '(4,4,2) x (10,10), drift time < 30 us', 'green', '--'),
+						(dQ_over_Q_10x10_4x4x2_drifttime_60us, '(4,4,2) x (10,10), drift time < 60 us', 'purple', None),
+						(dQ_over_Q_10x10_4x4x2_drifttime_20us, '(4,4,2) x (10,10), drift time < 20 us', 'blue', ':')]
+						# # (dQ_over_Q_8x8_2x2x2, '(2,2,2) x (8,8)', 'green'),
 						# (dQ_over_Q_6x6_2x2x2, '(2,2,2) x (6,6)', 'blue'),]
 						
 		output_file = '/'.join([root_path, 'HDF5/dQ_over_Q_overlay_10x10_8x8_6x6.png'])
@@ -210,8 +217,8 @@ def effq_accuracy_eval_diffent_diffCoeff():
 		# output_file = '/'.join([root_path, 'test.png'])
 		acc_effq_eval.overlay_hists_deltaQ(*dQ_over_Q_list, title='Relative difference of the charges at each pixel', xlabel=r'$(Q-Q_{ref})/Q_{ref}$', ylabel='Counts', output_file=output_file)
 
-def effq_accuracy_eval_cuton_loctime():
-	root_path = "/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/ACC_EFFQ/cut_on_loctime_2_5_nocut_event1003"
+def effq_accuracy_evaluation():
+	root_path = "/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/ACC_EFFQ/November10_2025"
 
 	# initialize the variables to store the deltaQ and dQ_over_Q
 	deltaQ_10x10_4x4x2, dQ_over_Q_10x10_4x4x2 = None, None
@@ -224,45 +231,45 @@ def effq_accuracy_eval_cuton_loctime():
 		saveHDF5 = True
 		##
 		## SAME DIFFUSION COEFF
-		path_to_ref = '/'.join([root_path, '10x10_partitions_2x2x2_LocTime_lessthan2.npz'])
-		path_to_10x10_4x4x2 = '/'.join([root_path, '10x10_partitions_4x4x2_LocTime_lessthan2.npz'])
-		output_file_10x10_hdf5 = '/'.join([root_path, 'HDF5/EffectiveCharge_10x10_4x4x2_LocTime_lessthan2.hdf5'])
+		path_to_ref = '/'.join([root_path, '10x10_2x2x2_tdrift20.npz'])
+		path_to_10x10_4x4x2 = '/'.join([root_path, '10x10_4x4x2_tdrift20.npz'])
+		output_file_10x10_hdf5 = '/'.join([root_path, 'HDF5/EffectiveCharge_10x10_4x4x2_tdrift20.hdf5'])
 		acc_effq_eval.npz2hdf5(npz_data=path_to_10x10_4x4x2, npz_ref=path_to_ref, saveHDF5=saveHDF5, output_hdf5=output_file_10x10_hdf5, getEffq=getEffq)
 
-		path_to_ref = '/'.join([root_path, '10x10_partitions_2x2x2_LocTime_morethan5.npz'])
-		path_to_10x10_4x4x2_DT88cm2 = '/'.join([root_path, '10x10_partitions_4x4x2_LocTime_morethan5.npz'])
-		output_file_10x10_DT88cm2_hdf5 = '/'.join([root_path, 'HDF5/EffectiveCharge_10x10_4x4x2_LocTime_morethan5.hdf5'])
-		acc_effq_eval.npz2hdf5(npz_data=path_to_10x10_4x4x2_DT88cm2, npz_ref=path_to_ref, saveHDF5=saveHDF5, output_hdf5=output_file_10x10_DT88cm2_hdf5, getEffq=getEffq)
+		path_to_ref = '/'.join([root_path, '10x10_2x2x2_tdrift20.npz'])
+		path_to_8x8_2x2x2_tdrift20 = '/'.join([root_path, '8x8_2x2x2_tdrift20.npz'])
+		output_file_8x8_tdrift20 = '/'.join([root_path, 'HDF5/EffectiveCharge_8x8_2x2x2_tdrift20.hdf5'])
+		acc_effq_eval.npz2hdf5(npz_data=path_to_8x8_2x2x2_tdrift20, npz_ref=path_to_ref, saveHDF5=saveHDF5, output_hdf5=output_file_8x8_tdrift20, getEffq=getEffq)
 
 		# no cut 
-		path_to_ref_nocut = '/'.join([root_path, '10x10_partitions_2x2x2_LocTime_nocut.npz'])
-		path_to_10x10_4x4x2_nocut = '/'.join([root_path, '10x10_partitions_4x4x2_LocTime_nocut.npz'])
-		output_file_10x10_nocut_hdf5 = '/'.join([root_path, 'HDF5/EffectiveCharge_10x10_4x4x2_nocut.hdf5'])
-		acc_effq_eval.npz2hdf5(npz_data=path_to_10x10_4x4x2_nocut, npz_ref=path_to_ref_nocut, saveHDF5=saveHDF5, output_hdf5=output_file_10x10_nocut_hdf5, getEffq=getEffq)
+		path_to_ref_nocut = '/'.join([root_path, '10x10_2x2x2_tdrift20.npz'])
+		path_to_6x6_2x2x2_tdrift20 = '/'.join([root_path, '6x6_2x2x2_tdrift20.npz'])
+		output_file_6x6_2x2x2_tdrift20 = '/'.join([root_path, 'HDF5/EffectiveCharge_6x6_2x2x2_tdrift20.hdf5'])
+		acc_effq_eval.npz2hdf5(npz_data=path_to_6x6_2x2x2_tdrift20, npz_ref=path_to_ref_nocut, saveHDF5=saveHDF5, output_hdf5=output_file_6x6_2x2x2_tdrift20, getEffq=getEffq)
 
 	else:
-		hdf5_file_10x10_DT8pt8 = '/'.join([root_path, 'HDF5/EffectiveCharge_10x10_4x4x2_LocTime_lessthan2.hdf5'])
-		hdf5_file_10x10_DT88 = '/'.join([root_path, 'HDF5/EffectiveCharge_10x10_4x4x2_LocTime_morethan5.hdf5'])
-		hdf5_file_10x10_nocut = '/'.join([root_path, 'HDF5/EffectiveCharge_10x10_4x4x2_nocut.hdf5'])
+		hdf5_file_10x10 = '/'.join([root_path, 'HDF5/EffectiveCharge_10x10_4x4x2_tdrift20.hdf5'])
+		hdf5_file_8x8 = '/'.join([root_path, 'HDF5/EffectiveCharge_8x8_2x2x2_tdrift20.hdf5'])
+		hdf5_file_6x6 = '/'.join([root_path, 'HDF5/EffectiveCharge_6x6_2x2x2_tdrift20.hdf5'])
 
-		deltaQ_10x10_4x4x2, dQ_over_Q_10x10_4x4x2, high_dQ_over_Q_10x10, Npix_tot_10x10, Npix_belowthr_10x10 = acc_effq_eval.load_Q_fromHDF5(hdf5_file=hdf5_file_10x10_DT8pt8, cut_on_Qref=cut_on_Q, getEffq=getEffq)
+		deltaQ_10x10_4x4x2, dQ_over_Q_10x10_4x4x2, high_dQ_over_Q_10x10, Npix_tot_10x10, Npix_belowthr_10x10 = acc_effq_eval.load_Q_fromHDF5(hdf5_file=hdf5_file_10x10, cut_on_Qref=cut_on_Q, getEffq=getEffq)
 
-		deltaQ_10x10_4x4x2_DT88cm2, dQ_over_Q_10x10_4x4x2_DT88cm2, high_dQ_over_Q_10x10_DT88cm2, Npix_tot_10x1_DT88cm2, Npix_belowthr_10x10_DT88cm2 = acc_effq_eval.load_Q_fromHDF5(hdf5_file=hdf5_file_10x10_DT88, cut_on_Qref=cut_on_Q, getEffq=getEffq)
+		deltaQ_8x8_2x2x2, dQ_over_Q_8x8_2x2x2, high_dQ_over_Q_10x10_DT88cm2, Npix_tot_10x1_DT88cm2, Npix_belowthr_10x10_DT88cm2 = acc_effq_eval.load_Q_fromHDF5(hdf5_file=hdf5_file_8x8, cut_on_Qref=cut_on_Q, getEffq=getEffq)
 
-		deltaQ_10x10_4x4x2_notcut, dQ_over_Q_10x10_4x4x2_nocut, high_dQ_over_Q_10x10_nocut, Npix_tot_10x10_nocut, Npix_belowthr_10x10_nocut = acc_effq_eval.load_Q_fromHDF5(hdf5_file=hdf5_file_10x10_nocut, cut_on_Qref=cut_on_Q, getEffq=getEffq)
+		deltaQ_6x6_2x2x2, dQ_over_Q_6x6_2x2x2, high_dQ_over_Q_10x10_nocut, Npix_tot_10x10_nocut, Npix_belowthr_10x10_nocut = acc_effq_eval.load_Q_fromHDF5(hdf5_file=hdf5_file_6x6, cut_on_Qref=cut_on_Q, getEffq=getEffq)
 
 		## SAME DIFFUSION COEFF
-		delta_Q_list = [(deltaQ_10x10_4x4x2, '(4,4,2) x (10,10), Local time <= 2', 'red'), #, 8.8 cm2 Transversal diff coeff
-				  		(deltaQ_10x10_4x4x2_DT88cm2, '(4,4,2) x (10,10), Local time >= 5', 'green'),
-						  (deltaQ_10x10_4x4x2_notcut, '(4,4,2) x (10,10), No cut', 'blue')]
+		delta_Q_list = [(deltaQ_10x10_4x4x2, '(4,4,2) x (10,10)', 'red', None), #, 8.8 cm2 Transversal diff coeff
+				  		(deltaQ_8x8_2x2x2, '(2,2,2) x (8,8)', 'green', '--'),
+						  (deltaQ_6x6_2x2x2, '(2,2,2) x (6,6)', 'blue', ':')]
 						# (deltaQ_8x8_2x2x2, '(2,2,2) x (8,8)', 'green'),
 						# (deltaQ_6x6_2x2x2, '(2,2,2) x (6,6)', 'blue')]
 		output_file = '/'.join([root_path, 'HDF5/deltaQ_overlay_10x10_8x8_6x6.png'])
 		acc_effq_eval.overlay_hists_deltaQ(*delta_Q_list, title='Effective charge distributions wrt (2,2,2) x (10,10)', xlabel='Delta Q [ke-]', ylabel='Counts', output_file=output_file)
 
-		dQ_over_Q_list = [(dQ_over_Q_10x10_4x4x2, '(4,4,2) x (10,10), Local time <= 2', 'red'), #, 8.8 cm2 Transversal diff coeff
-						(dQ_over_Q_10x10_4x4x2_DT88cm2, '(4,4,2) x (10,10), Local time >= 5', 'green'),
-						(dQ_over_Q_10x10_4x4x2_nocut, '(4,4,2) x (10,10), No cut', 'blue')]
+		dQ_over_Q_list = [(dQ_over_Q_10x10_4x4x2, '(4,4,2) x (10,10)', 'red', None), #, 8.8 cm2 Transversal diff coeff
+						(dQ_over_Q_8x8_2x2x2, '(2,2,2) x (8,8)', 'green', '--'),
+						(dQ_over_Q_6x6_2x2x2, '(2,2,2) x (6,6)', 'blue', ':')]
 						# (dQ_over_Q_8x8_2x2x2, '(2,2,2) x (8,8)', 'green'),
 						# (dQ_over_Q_6x6_2x2x2, '(2,2,2) x (6,6)', 'blue'),]
 						
@@ -417,9 +424,11 @@ def separation_by_time():
 	
 if __name__ == '__main__':
 	# separation_by_time()
+	# effq_accuracy_evaluation()
+
 	# effq_accuracy_eval_cuton_drifttime()
 	# effq_accuracy_eval_cuton_loctime()
 	# effq_accuracy_eval_diffent_diffCoeff()
-	effq_accuracy_eval_with_diffusion_cap()
-	# runtime_evaluation()
+	# effq_accuracy_eval_with_diffusion_cap()
+	runtime_evaluation()
 	# memory_evaluation()
