@@ -276,7 +276,7 @@ def load_Q_fromHDF5(hdf5_file='', cut_on_Qref=1, getEffq=False): # ke-
 	high_dQ_over_Q_allTPCs = {f'tpc{i}': {'dQ_over_Q': [], 'pixel_locs': []} for i in range(70)}
 	
 	##--- Plot Q vs Qref ----
-	cut_on_deltaQ = 1e-4#2 # ke-
+	cut_on_deltaQ = 2#2 # ke-
 	Q_array = np.array([], dtype=np.float32)
 	Qref_array = np.array([], dtype=np.float32)
 	####
@@ -385,8 +385,9 @@ def overlay_hists_deltaQ(*deltaQ_list, title, xlabel, ylabel, output_file=''):
 			ylabel (str): Label for the y-axis.
 			output_file (str): Filename to save the plot.
 	"""
+	print(len(deltaQ_list))
 	plt.figure(figsize=(10, 6))
-	for (deltaQ, label, color) in deltaQ_list:
+	for (deltaQ, label, color, linestyle) in deltaQ_list:
 		## concatenate the accumulated charge from all TPCs
 		all_tpcs_deltaQ = np.array([], dtype=np.float32)
 		for itpc in deltaQ.keys():
@@ -395,7 +396,9 @@ def overlay_hists_deltaQ(*deltaQ_list, title, xlabel, ylabel, output_file=''):
 	
 		## plot the distribution of all accumulated charges
 		# plt.hist(deltaQ, bins=100, histtype='step', color=color, label=label)
-		plt.hist(all_tpcs_deltaQ, bins=100, histtype='step', color=color, label=label)
+		if linestyle is None:
+			linestyle='-'
+		plt.hist(all_tpcs_deltaQ, bins=100, histtype='step', color=color, label=label, linewidth=1.5, linestyle=linestyle)
 		# ax[1].hist(all_tpcs_deltaQ, bins=100, histtype='step', color=color, label=label)
 		# plt.hist(deltaQ, bins=100, range=(-1000, 1000), histtype='step', color=color, label=label)
 	plt.xlabel(xlabel, fontsize=18)
