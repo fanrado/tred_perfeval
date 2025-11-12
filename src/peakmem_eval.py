@@ -94,7 +94,7 @@ def overlay_plots(*args, title='', xlabel='', ylabel='', output_file='overlay_pl
 		ylabel (str): Label for the y-axis.
 		output_file (str): Filename to save the plot.
 	"""
-	plt.figure(figsize=(12,10))
+	plt.figure(figsize=(12,12))
 	hep.style.use("CMS") 
 	i = 1
 	filled_markers = ['.', 'o', 'v', '*', '^', '<', '8', 's', 'p', 'h', 'H', 'D', 'd', 'P', 'X']
