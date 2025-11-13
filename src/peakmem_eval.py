@@ -154,6 +154,17 @@ def benchmark_peak_memory_nodynamic_chunking_and_batching(input_path: str):
 		# else:
 		tuple_data = (organized_data['N_segments'], organized_data['peak_memory_perbatch'], label, colors[i])
 		list_of_tuple_data.append(tuple_data)
+	## Save the data in a json
+	data_dict = {}
+	for x_data, y_data, label, color in list_of_tuple_data:
+		data_dict[label] = {
+			'N_segments': x_data,
+			'peak_memory_perbatch': y_data
+		}
+	output_file_json = '/'.join([input_path, 'peakmem_vs_Nsegments_nodynamic_chunking_batching.json'])
+	with open(output_file_json, 'w') as f:
+		json.dump(data_dict, f, indent=4)
+
 	overlay_plots(*list_of_tuple_data, title=f'Peak memory vs N_segments, {title}', xlabel='N segments', ylabel='Peak Memory (MB)', output_file='/'.join([input_path, 'peakmem_vs_Nsegments_nodynamic_chunking_batching.png']), nodynChunkBatch=True)
 
 def benchmark_peak_memory_dynamic_chunking_and_batching(input_path: str):
