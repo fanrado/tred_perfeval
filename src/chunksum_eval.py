@@ -160,6 +160,7 @@ def get_runtime_chunksum_i(path_to_file: str, output_path: str):
 	for f in list_json:
 		runtime = get_chunksum_runtime(data_json=load_json(os.path.join(path_to_file, f)))
 		if runtime['Nbin_chunksum_i'] not in Nbins:
+			print(runtime['Nbin_chunksum_i'], runtime['runtime_chunksum_i_sec_mean'])
 			Nbins.append(runtime['Nbin_chunksum_i'])
 			t_mean.append(runtime['runtime_chunksum_i_sec_mean'])
 			t_std.append(runtime['runtime_chunksum_i_sec_std'])
@@ -245,6 +246,6 @@ if __name__=='__main__':
 	# plt.tight_layout()
 	# plt.savefig('../tests/chunksum_qblock_runtime_vs_Nbins.png')
 	# plt.close()
-	get_runtime_chunksum_qblock(path_to_file=path_to_file, output_path='../tests/')
+	# get_runtime_chunksum_qblock(path_to_file=path_to_file, output_path='../tests/')
 	get_runtime_chunksum_i(path_to_file=path_to_file, output_path='../tests/')
-	get_runtime_chunksum_readout(path_to_file=path_to_file, output_path='../tests/')
+	# get_runtime_chunksum_readout(path_to_file=path_to_file, output_path='../tests/')
