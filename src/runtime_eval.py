@@ -77,7 +77,7 @@ def benchmark_runtime(input_path: str):
 	"""
 		Benchmark runtime evaluation from the input path.
 	"""
-	list_files 				= [f for f in os.listdir(input_path) if f.endswith('.json')]
+	list_files 				= [f for f in os.listdir(input_path) if (f.endswith('.json')) and ('runtime_vs_Nsegments' not in f) and ('majorOps' not in f)]
 	list_tuples 			= []
 	colors 					= ['maroon', 'green', 'black', 'purple', 'red', 'blue', 'orange']
 	for i, f in enumerate(list_files):
@@ -95,6 +95,16 @@ def benchmark_runtime(input_path: str):
 		y_sorted = np.array(y_data)[sort_indices]
 		tuple_data = (x_sorted, y_sorted, label, colors[i])
 		list_tuples.append(tuple_data)
+	## Save data in a json file
+	data_dict = {}
+	for x_data, y_data, label, color in list_tuples:
+		data_dict[label] = {
+			'N_segments' : x_data.tolist(),
+			'runtimes_perbatch' : y_data.tolist()
+		}
+	output_json_file = '/'.join([input_path, 'runtime_vs_Nsegments.json'])
+	with open(output_json_file, 'w') as f:
+		json.dump(data_dict, f)
 	output_file = '/'.join([input_path, 'runtime_vs_Nsegments.png'])
 	overlay_plots(*list_tuples, title='Runtime vs N_segments', xlabel='N segments', ylabel='Runtime (sec)', output_file=output_file)
 
@@ -192,7 +202,20 @@ def get_runtime_majorOperations(data: dict):
 	organized_data['chunksum_readout'] 				= chunksum_readout
 	organized_data['concat_readout'] 				= concat_readout
 	organized_data['formingBlock_readout_current'] 	= formingBlock_readout_current
-	return organized_data
+
+	## Calculate major operations runtime
+	Electronic_readout = np.sum(organized_data['chunksum_readout']) + np.sum(organized_data['concat_readout']) + np.sum(organized_data['formingBlock_readout_current'])
+	Induced_current_calculation = np.sum( organized_data['chunking_conv']['conv_chunksum_i'] ) + np.sum( organized_data['chunking_conv']['conv_conv'] ) + np.sum( organized_data['chunking_conv']['sumcurrent'] ) + np.sum( organized_data['sum_current'] )
+	Rasterization_of_ionization_charges = np.sum( organized_data['chunking_conv']['chunksum_qblock'] ) + np.sum( organized_data['chunking_conv']['rasterize'] )
+	Recombination_attenuation_and_drift = np.sum( organized_data['recombination'] ) + np.sum( organized_data['drift'] )
+
+	major_operations_runtime = {
+		'Electronic_readout' : Electronic_readout,
+		'Induced_current_calculation' : Induced_current_calculation,
+		'Rasterization_of_ionization_charges' : Rasterization_of_ionization_charges,
+		'Recombination_attenuation_and_drift' : Recombination_attenuation_and_drift
+	}
+	return major_operations_runtime
 
 def runtimeshare_majorOp(organized_data: dict, output_file=''):
 	"""
@@ -209,10 +232,14 @@ def runtimeshare_majorOp(organized_data: dict, output_file=''):
 			-- Rasterization of ionization charges: chunksum_qblock + rasterize
 			-- Recombination, attenuation, and drift: recombination + drift
 	"""
-	Electronic_readout = np.sum(organized_data['chunksum_readout']) + np.sum(organized_data['concat_readout']) + np.sum(organized_data['formingBlock_readout_current'])
-	Induced_current_calculation = np.sum( organized_data['chunking_conv']['conv_chunksum_i'] ) + np.sum( organized_data['chunking_conv']['conv_conv'] ) + np.sum( organized_data['chunking_conv']['sumcurrent'] ) + np.sum( organized_data['sum_current'] )
-	Rasterization_of_ionization_charges = np.sum( organized_data['chunking_conv']['chunksum_qblock'] ) + np.sum( organized_data['chunking_conv']['rasterize'] )
-	Recombination_attenuation_and_drift = np.sum( organized_data['recombination'] ) + np.sum( organized_data['drift'] )
+	# Electronic_readout = np.sum(organized_data['chunksum_readout']) + np.sum(organized_data['concat_readout']) + np.sum(organized_data['formingBlock_readout_current'])
+	# Induced_current_calculation = np.sum( organized_data['chunking_conv']['conv_chunksum_i'] ) + np.sum( organized_data['chunking_conv']['conv_conv'] ) + np.sum( organized_data['chunking_conv']['sumcurrent'] ) + np.sum( organized_data['sum_current'] )
+	# Rasterization_of_ionization_charges = np.sum( organized_data['chunking_conv']['chunksum_qblock'] ) + np.sum( organized_data['chunking_conv']['rasterize'] )
+	# Recombination_attenuation_and_drift = np.sum( organized_data['recombination'] ) + np.sum( organized_data['drift'] )
+	Electronic_readout = organized_data['Electronic_readout']
+	Induced_current_calculation = organized_data['Induced_current_calculation']
+	Rasterization_of_ionization_charges = organized_data['Rasterization_of_ionization_charges']
+	Recombination_attenuation_and_drift = organized_data['Recombination_attenuation_and_drift']
 
 	labels = ['Electronic readout', 'Induced current calculation', 'Rasterization of ionization charges', 'Recombination, attenuation, and drift']
 	sizes = [Electronic_readout, Induced_current_calculation, Rasterization_of_ionization_charges, Recombination_attenuation_and_drift]
