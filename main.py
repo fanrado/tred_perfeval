@@ -13,6 +13,10 @@ def load_json(input_file=''):
 		data = json.load(f)
 	return data
 
+def save_json(output_file='', data={}):
+	with open(output_file, 'w') as f:
+		json.dump(data, f)
+
 def effq_accuracy_eval_with_diffusion_cap():
 	'''
 	    Plot the distribution of deltaQ = EffQ - EffQ_ref and dQ_over_Q = (EffQ - EffQ_ref)/EffQ_ref.
@@ -91,6 +95,10 @@ def runtime_evaluation():
 	input_file = '/'.join([input_dir, input_subdir, filename])
 	data = load_json(input_file=input_file)
 	runtime_majorOps = runtime_eval.get_runtime_majorOperations(data=data)
+	# save the major ops runtime data in a json
+	output_file_json = '/'.join([input_dir, input_subdir, 'runtime_majorOps_batchsize8192_NBCHUNK100_NBCHUNKCONV50.json'])
+	save_json(output_file=output_file_json, data=runtime_majorOps)
+	#
 	runtime_eval.runtimeshare_majorOp(organized_data=runtime_majorOps, output_file='/'.join([input_dir, input_subdir, 'runtime_share_majorOps.png']))
 	## Overlay of the runtime for different batch schemes
 	input_dir = '/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/RUNTIME_EVAL/preliminary/benchmark_plot/new_benchmark_plot'
@@ -218,7 +226,7 @@ def effq_accuracy_eval_diffent_diffCoeff():
 		acc_effq_eval.overlay_hists_deltaQ(*dQ_over_Q_list, title='Relative difference of the charges at each pixel', xlabel=r'$(Q-Q_{ref})/Q_{ref}$', ylabel='Counts', output_file=output_file)
 
 def effq_accuracy_evaluation():
-	root_path = "/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/ACC_EFFQ/November10_2025"
+	root_path = "/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/ACC_EFFQ/November10_2025/slide17_November11_2025_effq_out_nt_1"
 
 	# initialize the variables to store the deltaQ and dQ_over_Q
 	deltaQ_10x10_4x4x2, dQ_over_Q_10x10_4x4x2 = None, None
@@ -257,6 +265,24 @@ def effq_accuracy_evaluation():
 		deltaQ_8x8_2x2x2, dQ_over_Q_8x8_2x2x2, high_dQ_over_Q_10x10_DT88cm2, Npix_tot_10x1_DT88cm2, Npix_belowthr_10x10_DT88cm2 = acc_effq_eval.load_Q_fromHDF5(hdf5_file=hdf5_file_8x8, cut_on_Qref=cut_on_Q, getEffq=getEffq)
 
 		deltaQ_6x6_2x2x2, dQ_over_Q_6x6_2x2x2, high_dQ_over_Q_10x10_nocut, Npix_tot_10x10_nocut, Npix_belowthr_10x10_nocut = acc_effq_eval.load_Q_fromHDF5(hdf5_file=hdf5_file_6x6, cut_on_Qref=cut_on_Q, getEffq=getEffq)
+
+		## Save data from hdf5 to .json for easy access later
+		data_dict = {
+			'10x10_4x4x2': {
+				'deltaQ': {key: value.tolist() if isinstance(value, np.ndarray) else value for key, value in deltaQ_10x10_4x4x2.items()},
+				'dQ_over_Q': {key: value.tolist() if isinstance(value, np.ndarray) else value for key, value in dQ_over_Q_10x10_4x4x2.items()}
+				},
+			'8x8_2x2x2': {
+				'deltaQ': {key: value.tolist() if isinstance(value, np.ndarray) else value for key, value in deltaQ_8x8_2x2x2.items()},
+				'dQ_over_Q': {key: value.tolist() if isinstance(value, np.ndarray) else value for key, value in dQ_over_Q_8x8_2x2x2.items()}
+				},
+			'6x6_2x2x2': {
+				'deltaQ': {key: value.tolist() if isinstance(value, np.ndarray) else value for key, value in deltaQ_6x6_2x2x2.items()},
+				'dQ_over_Q': {key: value.tolist() if isinstance(value, np.ndarray) else value for key, value in dQ_over_Q_6x6_2x2x2.items()}
+				}
+		}
+		output_json_file = '/'.join([root_path, 'HDF5/effq_accuracy_data.json'])
+		save_json(output_file=output_json_file, data=data_dict)
 
 		## SAME DIFFUSION COEFF
 		delta_Q_list = [(deltaQ_10x10_4x4x2, '(4,4,2) x (10,10)', 'red', None), #, 8.8 cm2 Transversal diff coeff
@@ -424,11 +450,11 @@ def separation_by_time():
 	
 if __name__ == '__main__':
 	# separation_by_time()
-	# effq_accuracy_evaluation()
+	effq_accuracy_evaluation()
 
 	# effq_accuracy_eval_cuton_drifttime()
 	# effq_accuracy_eval_cuton_loctime()
 	# effq_accuracy_eval_diffent_diffCoeff()
 	# effq_accuracy_eval_with_diffusion_cap()
-	runtime_evaluation()
+	# runtime_evaluation()
 	# memory_evaluation()
