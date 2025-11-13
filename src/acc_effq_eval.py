@@ -55,7 +55,7 @@ def load_npz(input_file='', cut_on_Q=1, getEffq=False): #ke-
 			print(key)
 			acc_charge = None
 			if getEffq:
-				acc_charge = data[key][:, -1] ### Get the effective charge at a pixel location
+				acc_charge = data[key][:, -1] ### Get the effective charge at a pixel location #### No need to sum over time ticks here. This is already done in graph_effq.py when saving qbd
 				# acc_charge = np.sum(data[key], axis=(1,2,3)) ### Get the effective charge at a pixel location
 				# print(acc_charge.shape)
 				# # sys.exit()
