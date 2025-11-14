@@ -172,6 +172,32 @@ def effq_evaluation(path_to_file: str=''):
 	output_file_dQ_over_Q = path_to_file.replace('.json', '_dQ_over_Q.png')
 	overlay_hists_deltaQ(*list_of_dQ_over_Q_tuple, title='dQ/Q Distribution', xlabel='dQ/Q', ylabel='Counts', output_file=output_file_dQ_over_Q)
 
+def runtime_chunksum(path_to_file: str=''):
+	xlabel = 'Number of bins in chunksum current'
+	ylabel = 'Runtime (sec)'
+	title = 'Chunksum current Runtime vs Number of bins'
+	def plot_chunksum_runtime_vs_Nbins(Nbins: list, t_mean: list, t_std: list, output_path: str, xlabel: str='Number of bins', ylabel: str='Runtime (sec)', title: str='Chunksum Runtime vs Number of bins'):
+		plt.figure(figsize=(10, 8))
+		hep.style.use("CMS") 
+		plt.errorbar(Nbins, t_mean, yerr=t_std, fmt='o--', ecolor='r', capsize=5, label=r'Mean $\pm stdev$')
+		# plt.plot(Nbins_sorted, t_mean_sorted, '*--', label=r'Mean $\pm stdev$')
+		plt.xlabel(xlabel, fontsize=20)
+		plt.ylabel(ylabel, fontsize=20)
+		plt.title(title, fontsize=20)
+		plt.xticks(fontsize=15)
+		plt.yticks(fontsize=15)
+		plt.legend(fontsize=15)
+		plt.grid(True)
+		plt.tight_layout()
+		plt.savefig(f'{output_path}')
+		plt.close()
+	data = load_json(path_to_file) ## load chunksum_runtime_vs_Nbins.json
+	Nbins = data['Nbins']
+	t_mean = data['t_mean']
+	t_std = data['t_std']
+	output_path = path_to_file.replace('.json', '.png')
+	plot_chunksum_runtime_vs_Nbins(Nbins, t_mean, t_std, output_path=output_path, xlabel=xlabel, ylabel=ylabel, title=title)
+
 if __name__ == "__main__":
 	## Peak memory evaluation without dynamic chunking and batching
 	input_path_peakmem = 'data4plots/peakmem_vs_Nsegments_nodynamic_chunking_batching.json'  ## path to peakmem_vs_Nsegments_nodynamic_chunking_batching.json
@@ -187,4 +213,8 @@ if __name__ == "__main__":
 	## Effective charge evaluation
 	path_to_file = 'data4plots/effq_accuracy_data_effq_out_nt_1.json'
 	effq_evaluation(path_to_file)
+
+	## Chunksum runtime evaluation
+	path_to_file = 'tests/chunksum_i_runtime_vs_Nbins.json'
+	runtime_chunksum(path_to_file)
 	
