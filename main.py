@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import src.peakmem_eval as peakmem_eval
 import src.runtime_eval as runtime_eval
 import src.acc_effq_eval as acc_effq_eval
+import src.chunksum_eval as chunksum_eval
 import numpy.lib.recfunctions as rfn
 # input_dir = '/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/MEMORY_EVAL/no_dynBatchChunk/benchmark_plot'
 
@@ -226,7 +227,7 @@ def effq_accuracy_eval_diffent_diffCoeff():
 		acc_effq_eval.overlay_hists_deltaQ(*dQ_over_Q_list, title='Relative difference of the charges at each pixel', xlabel=r'$(Q-Q_{ref})/Q_{ref}$', ylabel='Counts', output_file=output_file)
 
 def effq_accuracy_evaluation():
-	root_path = "/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/ACC_EFFQ/November10_2025/slide17_November11_2025_effq_out_nt_1"
+	root_path = "/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/ACC_EFFQ/November10_2025/slide15_November11_2025_effq_out_nt_10"
 
 	# initialize the variables to store the deltaQ and dQ_over_Q
 	deltaQ_10x10_4x4x2, dQ_over_Q_10x10_4x4x2 = None, None
@@ -255,16 +256,25 @@ def effq_accuracy_evaluation():
 		output_file_6x6_2x2x2_tdrift20 = '/'.join([root_path, 'HDF5/EffectiveCharge_6x6_2x2x2_tdrift20.hdf5'])
 		acc_effq_eval.npz2hdf5(npz_data=path_to_6x6_2x2x2_tdrift20, npz_ref=path_to_ref_nocut, saveHDF5=saveHDF5, output_hdf5=output_file_6x6_2x2x2_tdrift20, getEffq=getEffq)
 
+		## 1x1x1 10x10 effq_out_nt_10
+		path_to_ref = '/'.join([root_path, '10x10_2x2x2_tdrift20.npz'])
+		path_to_10x10_4x4x2 = '/'.join([root_path, '10x10_1x1x1_tdrift20.npz'])
+		output_file_10x10_hdf5 = '/'.join([root_path, 'HDF5/EffectiveCharge_10x10_1x1x1_tdrift20.hdf5'])
+		acc_effq_eval.npz2hdf5(npz_data=path_to_10x10_4x4x2, npz_ref=path_to_ref, saveHDF5=saveHDF5, output_hdf5=output_file_10x10_hdf5, getEffq=getEffq)
+
 	else:
 		hdf5_file_10x10 = '/'.join([root_path, 'HDF5/EffectiveCharge_10x10_4x4x2_tdrift20.hdf5'])
 		hdf5_file_8x8 = '/'.join([root_path, 'HDF5/EffectiveCharge_8x8_2x2x2_tdrift20.hdf5'])
 		hdf5_file_6x6 = '/'.join([root_path, 'HDF5/EffectiveCharge_6x6_2x2x2_tdrift20.hdf5'])
+		hdf5_file_10x10_1x1x1 = '/'.join([root_path, 'HDF5/EffectiveCharge_10x10_1x1x1_tdrift20.hdf5'])
 
 		deltaQ_10x10_4x4x2, dQ_over_Q_10x10_4x4x2, high_dQ_over_Q_10x10, Npix_tot_10x10, Npix_belowthr_10x10 = acc_effq_eval.load_Q_fromHDF5(hdf5_file=hdf5_file_10x10, cut_on_Qref=cut_on_Q, getEffq=getEffq)
 
 		deltaQ_8x8_2x2x2, dQ_over_Q_8x8_2x2x2, high_dQ_over_Q_10x10_DT88cm2, Npix_tot_10x1_DT88cm2, Npix_belowthr_10x10_DT88cm2 = acc_effq_eval.load_Q_fromHDF5(hdf5_file=hdf5_file_8x8, cut_on_Qref=cut_on_Q, getEffq=getEffq)
 
 		deltaQ_6x6_2x2x2, dQ_over_Q_6x6_2x2x2, high_dQ_over_Q_10x10_nocut, Npix_tot_10x10_nocut, Npix_belowthr_10x10_nocut = acc_effq_eval.load_Q_fromHDF5(hdf5_file=hdf5_file_6x6, cut_on_Qref=cut_on_Q, getEffq=getEffq)
+
+		deltaQ_10x10_1x1x1, dQ_over_Q_10x10_1x1x1, _, _, _ = acc_effq_eval.load_Q_fromHDF5(hdf5_file=hdf5_file_10x10_1x1x1, cut_on_Qref=cut_on_Q, getEffq=getEffq)
 
 		## Save data from hdf5 to .json for easy access later
 		data_dict = {
@@ -287,7 +297,8 @@ def effq_accuracy_evaluation():
 		## SAME DIFFUSION COEFF
 		delta_Q_list = [(deltaQ_10x10_4x4x2, '(4,4,2) x (10,10)', 'red', None), #, 8.8 cm2 Transversal diff coeff
 				  		(deltaQ_8x8_2x2x2, '(2,2,2) x (8,8)', 'green', '--'),
-						  (deltaQ_6x6_2x2x2, '(2,2,2) x (6,6)', 'blue', ':')]
+						  (deltaQ_6x6_2x2x2, '(2,2,2) x (6,6)', 'blue', ':'),
+						  (deltaQ_10x10_1x1x1, '(1,1,1) x (10,10)', 'purple', '-.')]
 						# (deltaQ_8x8_2x2x2, '(2,2,2) x (8,8)', 'green'),
 						# (deltaQ_6x6_2x2x2, '(2,2,2) x (6,6)', 'blue')]
 		output_file = '/'.join([root_path, 'HDF5/deltaQ_overlay_10x10_8x8_6x6.png'])
@@ -302,7 +313,6 @@ def effq_accuracy_evaluation():
 		output_file = '/'.join([root_path, 'HDF5/dQ_over_Q_overlay_10x10_8x8_6x6.png'])
 		# output_file = '/'.join([root_path, 'test.png'])
 		acc_effq_eval.overlay_hists_deltaQ(*dQ_over_Q_list, title='Relative difference of the charges at each pixel', xlabel=r'$(Q-Q_{ref})/Q_{ref}$', ylabel='Counts', output_file=output_file)
-
 
 def fill_missing_data(data, ref):
 	pix_locs_array = acc_effq_eval.get_all_pixels_locations(data, ref)
@@ -448,13 +458,21 @@ def separation_by_time():
 		plt.savefig('/'.join([output_dir, 'pixel_time_distribution.png']))
 		plt.close()
 	
-if __name__ == '__main__':
-	# separation_by_time()
-	effq_accuracy_evaluation()
+def runtime_chunksum():
+	path_to_file = '/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/CHUNKSUM_EVAL/'
+	chunksum_eval.get_runtime_chunksum_i(path_to_file=path_to_file, output_path='tests/')
 
-	# effq_accuracy_eval_cuton_drifttime()
-	# effq_accuracy_eval_cuton_loctime()
-	# effq_accuracy_eval_diffent_diffCoeff()
-	# effq_accuracy_eval_with_diffusion_cap()
+	# chunksum_eval.get_runtime_chunksum_qblock(path_to_file=path_to_file, output_path='../tests/')
+	# chunksum_eval.get_runtime_chunksum_readout(path_to_file=path_to_file, output_path='../tests/')
+
+if __name__ == '__main__':
+	# effq_accuracy_evaluation()
 	# runtime_evaluation()
 	# memory_evaluation()
+	runtime_chunksum()
+
+	#-------- Tests ----
+	# effq_accuracy_eval_diffent_diffCoeff()
+	# effq_accuracy_eval_with_diffusion_cap()
+	# separation_by_time()
+	
