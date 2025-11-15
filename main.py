@@ -229,12 +229,12 @@ def effq_accuracy_eval_diffent_diffCoeff():
 
 def effq_accuracy_evaluation():
 	# root_path = "/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/ACC_EFFQ/November10_2025/slide15_November11_2025_effq_out_nt_10"
-	root_path = "/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/ACC_EFFQ/November10_2025/torch_clamp_spreadT"
+	root_path = "/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/ACC_EFFQ/November15_2025"
 
 	# initialize the variables to store the deltaQ and dQ_over_Q
-	deltaQ_10x10_4x4x2, dQ_over_Q_10x10_4x4x2 = None, None
-	deltaQ_8x8_2x2x2, dQ_over_Q_8x8_2x2x2 = None, None
-	deltaQ_6x6_2x2x2, dQ_over_Q_6x6_2x2x2 = None, None
+	# deltaQ_10x10_4x4x2, dQ_over_Q_10x10_4x4x2 = None, None
+	# deltaQ_8x8_2x2x2, dQ_over_Q_8x8_2x2x2 = None, None
+	# deltaQ_6x6_2x2x2, dQ_over_Q_6x6_2x2x2 = None, None
 	readFrom_npz = False
 	getEffq = True  # Set to True to evaluate the effective charge accuracy, False for accumulated charge accuracy
 	cut_on_Q = 0.01 #0.01 # ke-
@@ -265,6 +265,7 @@ def effq_accuracy_evaluation():
 		# acc_effq_eval.npz2hdf5(npz_data=path_to_10x10_4x4x2, npz_ref=path_to_ref, saveHDF5=saveHDF5, output_hdf5=output_file_10x10_hdf5, getEffq=getEffq)
 
 	else:
+		print('Reading from HDF5 files...')
 		hdf5_file_10x10 = '/'.join([root_path, 'HDF5/EffectiveCharge_10x10_4x4x2.hdf5'])
 		hdf5_file_8x8 = '/'.join([root_path, 'HDF5/EffectiveCharge_8x8_2x2x2.hdf5'])
 		hdf5_file_6x6 = '/'.join([root_path, 'HDF5/EffectiveCharge_6x6_2x2x2.hdf5'])
@@ -303,6 +304,7 @@ def effq_accuracy_evaluation():
 						#   (deltaQ_10x10_1x1x1, '(1,1,1) x (10,10)', 'purple', '-.')]
 						# (deltaQ_8x8_2x2x2, '(2,2,2) x (8,8)', 'green'),
 						# (deltaQ_6x6_2x2x2, '(2,2,2) x (6,6)', 'blue')]
+		# delta_Q_list = [(deltaQ_8x8_2x2x2, '(2,2,2) x (8,8)', 'green', '--')]
 		output_file = '/'.join([root_path, 'HDF5/deltaQ_overlay_10x10_8x8_6x6.png'])
 		acc_effq_eval.overlay_hists_deltaQ(*delta_Q_list, title='Effective charge distributions wrt (2,2,2) x (10,10)', xlabel='Delta Q [ke-]', ylabel='Counts', output_file=output_file)
 
@@ -313,7 +315,7 @@ def effq_accuracy_evaluation():
 						# (dQ_over_Q_6x6_2x2x2, '(2,2,2) x (6,6)', 'blue'),]
 						
 		output_file = '/'.join([root_path, 'HDF5/dQ_over_Q_overlay_10x10_8x8_6x6.png'])
-		# output_file = '/'.join([root_path, 'test.png'])
+		# # output_file = '/'.join([root_path, 'test.png'])
 		acc_effq_eval.overlay_hists_deltaQ(*dQ_over_Q_list, title='Relative difference of the charges at each pixel', xlabel=r'$(Q-Q_{ref})/Q_{ref}$', ylabel='Counts', output_file=output_file)
 
 def fill_missing_data(data, ref):
@@ -468,8 +470,8 @@ def runtime_chunksum():
 	# chunksum_eval.get_runtime_chunksum_readout(path_to_file=path_to_file, output_path='../tests/')
 
 if __name__ == '__main__':
-	# effq_accuracy_evaluation()
-	runtime_evaluation()
+	effq_accuracy_evaluation()
+	# runtime_evaluation()
 	# memory_evaluation()
 	# runtime_chunksum()
 
