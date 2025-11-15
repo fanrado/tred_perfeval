@@ -41,56 +41,70 @@ def overlay_plots_mem(*args, title='', xlabel='', ylabel='', output_file='overla
 			plt.scatter(x_data, y_data, label=label, color=color, alpha=0.4, s=100, marker=filled_markers[j])
 		i += 2
 		j+=1
-	plt.xlabel(xlabel, fontsize=20)
-	plt.ylabel(ylabel, fontsize=20)
-	plt.title(title, fontsize=20)
-	plt.xticks(fontsize=20)
-	plt.yticks(fontsize=20)
-	plt.tight_layout()
-	plt.legend(loc='upper right', fontsize=15)
+	plt.xlabel(xlabel, fontsize=24)
+	plt.ylabel(ylabel, fontsize=24)
+	plt.title(title, fontsize=24)
+	plt.ylim([-500, 25000])
+	plt.xticks(fontsize=24)
+	plt.yticks(fontsize=24)
+	
+	plt.legend(loc='best', fontsize=24)
 	plt.grid(True)
-	plt.savefig(output_file)
+	plt.tight_layout()
+	plt.savefig(output_file, dpi=300, bbox_inches='tight')
 	plt.close()
 
 def benchmark_peak_memory_nodynamic_chunking_and_batching(path_to_file: str=''):
+	map_key = {
+		'nbchunk': 'chunk size',
+		'nbchunk_conv': 'convolution chunk size',
+	}
 	data = load_json(path_to_file) ## load peakmem_vs_Nsegments_nodynamic_chunking_batching.json
 	colors = ['red', 'green', 'black', 'purple', 'blue', 'maroon']
 	list_of_tuple_data = []
 	for i, key in enumerate(data.keys()):
 		x_data = np.array(data[key]['N_segments'])
 		y_data = np.array(data[key]['peak_memory_perbatch'])
-		label = key
+		print(key)
+		tmp_label = key.split(',')
+		label = f'{map_key['nbchunk']} : {tmp_label[0].split(':')[1]}, {map_key['nbchunk_conv']} : {tmp_label[1].split(':')[1]}'
 		color = colors[i]
 		list_of_tuple_data.append((x_data, y_data, label, color))
 	output_file = path_to_file.replace('.json', '.png')
-	overlay_plots_mem(*list_of_tuple_data, title='Peak Memory vs N_segments', xlabel='N segments', ylabel='Peak Memory (MB)', output_file=output_file, nodynChunkBatch=True)
+	overlay_plots_mem(*list_of_tuple_data, title='Peak Memory as a function of N_segments', xlabel='N segments', ylabel='Peak Memory (MB)', output_file=output_file, nodynChunkBatch=True)
 
 ## Runtime evaluation
 def overlay_plots_runtime(*args, title, xlabel, ylabel,output_file=''):
-	plt.figure(figsize=(10, 8))
+	plt.figure(figsize=(12, 9))
 	hep.style.use("CMS") 
 	filled_markers = ['.', '<', '+', '*', '^', '<', '8', 's', 'p', 'h', 'H', 'D', 'd', 'P', 'X']
 	for i,(x_data, y_data, label, color) in enumerate(args):
-		plt.scatter(x_data, y_data,label=label, color=color, alpha=0.7, marker=filled_markers[i], s=50)
-	plt.xlabel(xlabel, fontsize=20)
-	plt.ylabel(ylabel, fontsize=20)
-	plt.title(title, fontsize=20)
-	plt.xticks(fontsize=20)
-	plt.yticks(fontsize=20)
+		plt.scatter(x_data, y_data,label=label, color=color, alpha=0.7, marker=filled_markers[i], s=100)
+	plt.xlabel(xlabel, fontsize=24)
+	plt.ylabel(ylabel, fontsize=24)
+	plt.title(title, fontsize=24)
+	plt.ylim([-1, 15])
+	plt.xticks(fontsize=24)
+	plt.yticks(fontsize=24)
 	plt.tight_layout()
-	plt.legend(loc='upper left', fontsize=15)
+	plt.legend(loc='upper left', fontsize=24)
 	plt.grid(True)
-	plt.savefig(output_file)
+	plt.savefig(output_file, dpi=300)
 	plt.close()
 
 def benchmark_runtime(path_to_file: str=''):
+	map_key = {
+		'nbchunk': 'chunk size',
+		'nbchunk_conv': 'convolution chunk size',
+	}
 	data = load_json(path_to_file) ## load runtime_vs_Nsegments.json
 	list_of_tuple_data = []
 	colors 					= ['maroon', 'green', 'black', 'purple', 'red', 'blue', 'orange']
 	for i, key in enumerate(data.keys()):
 		x_data = np.array(data[key]['N_segments'])
 		y_data = np.array(data[key]['runtimes_perbatch'])
-		label = key
+		tmp_label = key.split(',')
+		label = f'{map_key['nbchunk']} : {tmp_label[0].split(':')[1]}, {map_key['nbchunk_conv']} : {tmp_label[1].split(':')[1]}'
 		color = colors[i]
 		list_of_tuple_data.append((x_data, y_data, label, color))
 	output_file = path_to_file.replace('.json', '.png')
@@ -107,15 +121,19 @@ def runtimeshare_majorOp(path_to_file: str=''):
 	sizes = [Electronic_readout, Induced_current_calculation, Rasterization_of_ionization_charges, Recombination_attenuation_and_drift]
 	colors = ['#ff9999','#66b3ff','#99ff99','#ffcc99']
 	explode = (0.05, 0.05, 0.05, 0.05)  # explode all slices slightly
-	plt.figure(figsize=(8, 8))
+	plt.figure(figsize=(12,10))
+	plt.subplots_adjust(right=0.7)
+	# hep.style.use("CMS")
 	wedges, texts, autotexts = plt.pie(sizes, explode=explode, labels=None, colors=colors, autopct='%1.1f%%',
                 shadow=True, startangle=140, pctdistance=1.1)
-	plt.title('Runtime Distribution of Major Operations', fontsize=16)
+	for autotext in autotexts:
+		autotext.set_fontsize(18)
+	plt.title('Runtime Distribution of Major Operations', fontsize=20)
 	plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle
-	plt.legend(wedges, labels, title="Operations", loc="upper right", bbox_to_anchor=(1.0, 1.0))
+	plt.legend(wedges, labels, title="Operations", loc="upper right", bbox_to_anchor=(1.1, 0.5), fontsize=18)
 	plt.tight_layout()
 	plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
-	plt.savefig(path_to_file.replace('.json', '.png'))
+	plt.savefig(path_to_file.replace('.json', '.png'), bbox_inches='tight')
 	plt.close()
 
 ## Effective charge evaluation
@@ -130,6 +148,7 @@ def overlay_hists_deltaQ(*deltaQ_list, title, xlabel, ylabel, output_file=''):
 			output_file (str): Filename to save the plot.
 	"""
 	plt.figure(figsize=(10, 6))
+	hep.style.use("CMS")
 	for (deltaQ, label, color, linestyle) in deltaQ_list:
 		## concatenate the accumulated charge from all TPCs
 		all_tpcs_deltaQ = np.array([], dtype=np.float32)
@@ -138,19 +157,19 @@ def overlay_hists_deltaQ(*deltaQ_list, title, xlabel, ylabel, output_file=''):
 
 		if linestyle is None:
 			linestyle='-'
-		plt.hist(all_tpcs_deltaQ, bins=100, histtype='step', color=color, label=label, linewidth=1.5, linestyle=linestyle)
+		plt.hist(all_tpcs_deltaQ, bins=100, histtype='step', color=color, label=label, linewidth=2, linestyle=linestyle)
 		# ax[1].hist(all_tpcs_deltaQ, bins=100, histtype='step', color=color, label=label)
 		# plt.hist(deltaQ, bins=100, range=(-1000, 1000), histtype='step', color=color, label=label)
-	plt.xlabel(xlabel, fontsize=18)
-	plt.ylabel(ylabel, fontsize=18)
+	plt.xlabel(xlabel, fontsize=24)
+	plt.ylabel(ylabel, fontsize=24)
 	plt.yscale('log')
-	# plt.xlim([-2, 5])
 	# plt.xlim([-0.15, 0])
-	plt.xticks(fontsize=18)
-	plt.yticks(fontsize=18)
-	plt.title(title, fontsize=18)
+	# plt.xlim([-2,5])
+	plt.xticks(fontsize=24)
+	plt.yticks(fontsize=24)
+	plt.title(title, fontsize=24)
 	plt.grid(True)
-	plt.legend(fontsize=14)
+	plt.legend(fontsize=24)
 	plt.tight_layout()
 	plt.savefig(output_file)
 	plt.close()
@@ -158,6 +177,7 @@ def overlay_hists_deltaQ(*deltaQ_list, title, xlabel, ylabel, output_file=''):
 def effq_evaluation(path_to_file: str=''):
 	data = load_json(path_to_file) ## load effq_accuracy_data.json
 	colors = ['maroon', 'green', 'red', 'purple', 'black', 'blue', 'orange']
+	linestyles = ['-', '--', '-.', ':', '-', '--', '-.']
 	list_of_deltaQ_tuple = []
 	list_of_dQ_over_Q_tuple = []
 	for i, key in enumerate(data.keys()):
@@ -165,8 +185,9 @@ def effq_evaluation(path_to_file: str=''):
 		dQ_over_Q = data[key]['dQ_over_Q']
 		label = key
 		color = colors[i]
-		list_of_deltaQ_tuple.append((deltaQ_data, label, color, None))
-		list_of_dQ_over_Q_tuple.append((dQ_over_Q, label, color, None))
+		linestyle = linestyles[i]
+		list_of_deltaQ_tuple.append((deltaQ_data, label, color, linestyle))
+		list_of_dQ_over_Q_tuple.append((dQ_over_Q, label, color, linestyle))
 	output_file_deltaQ = path_to_file.replace('.json', '_deltaQ.png')
 	overlay_hists_deltaQ(*list_of_deltaQ_tuple, title='Delta Q Distribution', xlabel='DeltaQ (ke-)', ylabel='Counts', output_file=output_file_deltaQ)
 	output_file_dQ_over_Q = path_to_file.replace('.json', '_dQ_over_Q.png')
@@ -181,12 +202,12 @@ def runtime_chunksum(path_to_file: str=''):
 		hep.style.use("CMS") 
 		plt.errorbar(Nbins, t_mean, yerr=t_std, fmt='o--', ecolor='r', capsize=5, label=r'Mean $\pm stdev$')
 		# plt.plot(Nbins_sorted, t_mean_sorted, '*--', label=r'Mean $\pm stdev$')
-		plt.xlabel(xlabel, fontsize=20)
-		plt.ylabel(ylabel, fontsize=20)
-		plt.title(title, fontsize=20)
-		plt.xticks(fontsize=15)
-		plt.yticks(fontsize=15)
-		plt.legend(fontsize=15)
+		plt.xlabel(xlabel, fontsize=24)
+		plt.ylabel(ylabel, fontsize=24)
+		plt.title(title, fontsize=24)
+		plt.xticks(fontsize=24)
+		plt.yticks(fontsize=24)
+		plt.legend(fontsize=24)
 		plt.grid(True)
 		plt.tight_layout()
 		plt.savefig(f'{output_path}')
@@ -205,16 +226,16 @@ if __name__ == "__main__":
 
 	## Runtime evaluation
 	input_path_runtime = 'data4plots/runtime_vs_Nsegments.json'  ## path to runtime_vs_Nsegments.json
-	# benchmark_runtime(input_path_runtime)
+	benchmark_runtime(input_path_runtime)
 
-	input_path_runtime = 'data4plots/runtime_majorOps_batchsize8192_NBCHUNK100_NBCHUNKCONV50.json'  ## path to runtime_majorOps_batchsize8192_NBCHUNK100_NBCHUNKCONV50.json
-	runtimeshare_majorOp(input_path_runtime)
+	# input_path_runtime = 'data4plots/runtime_majorOps_batchsize8192_NBCHUNK100_NBCHUNKCONV50.json'  ## path to runtime_majorOps_batchsize8192_NBCHUNK100_NBCHUNKCONV50.json
+	# runtimeshare_majorOp(input_path_runtime)
 
 	## Effective charge evaluation
-	path_to_file = 'data4plots/effq_accuracy_data_effq_out_nt_1.json'
+	path_to_file = 'data4plots/effq_accuracy_data_effq_out_nt_10.json'
 	effq_evaluation(path_to_file)
 
 	## Chunksum runtime evaluation
-	path_to_file = 'tests/chunksum_i_runtime_vs_Nbins.json'
+	path_to_file = 'data4plots/chunksum_i_runtime_vs_Nbins.json'
 	runtime_chunksum(path_to_file)
 	
