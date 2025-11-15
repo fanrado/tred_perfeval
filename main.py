@@ -76,7 +76,7 @@ def effq_accuracy_eval_with_diffusion_cap():
 def memory_evaluation():
 	# Peak memory usage ----
 	# input_dir = '/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/MEMORY_EVAL/preliminary/no_dynBatchChunk/benchmark_plot'
-	input_dir = '/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/MEMORY_EVAL/benchmark_plot_nodynChunkBatch'
+	input_dir = '/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/MEMORY_EVAL/to_use'
 	
 	peakmem_eval.benchmark_peak_memory_nodynamic_chunking_and_batching(input_path=input_dir)
 	# input_dir = "/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/MEMORY_EVAL/benchmark_plot_dynChunkBatch/files_plot"
@@ -88,8 +88,8 @@ def memory_evaluation():
 def runtime_evaluation():
 	## Runtime evaluation ----
 	## PIECHART RUNTIME for one event
-	# input_dir = '/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/RUNTIME_EVAL/preliminary/benchmark_plot/to_use'
-	input_dir = '/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/RUNTIME_EVAL/preliminary/benchmark_plot/new_benchmark_plot'
+	input_dir = '/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/RUNTIME_EVAL/off'
+	# input_dir = '/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/RUNTIME_EVAL/preliminary/benchmark_plot/new_benchmark_plot'
 	# input_subdir = 'runon_wcgpu1'
 	input_subdir = ''
 	filename = 'runtime_batchsize8192_NBCHUNK100_NBCHUNKCONV50.json'
@@ -102,7 +102,8 @@ def runtime_evaluation():
 	#
 	runtime_eval.runtimeshare_majorOp(organized_data=runtime_majorOps, output_file='/'.join([input_dir, input_subdir, 'runtime_share_majorOps.png']))
 	## Overlay of the runtime for different batch schemes
-	input_dir = '/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/RUNTIME_EVAL/preliminary/benchmark_plot/new_benchmark_plot'
+	# input_dir = '/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/RUNTIME_EVAL/preliminary/benchmark_plot/new_benchmark_plot'
+	input_dir = '/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/RUNTIME_EVAL/off'
 	runtime_eval.benchmark_runtime(input_path=input_dir)
 
 def effq_accuracy_eval_cuton_drifttime():
@@ -227,7 +228,8 @@ def effq_accuracy_eval_diffent_diffCoeff():
 		acc_effq_eval.overlay_hists_deltaQ(*dQ_over_Q_list, title='Relative difference of the charges at each pixel', xlabel=r'$(Q-Q_{ref})/Q_{ref}$', ylabel='Counts', output_file=output_file)
 
 def effq_accuracy_evaluation():
-	root_path = "/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/ACC_EFFQ/November10_2025/slide15_November11_2025_effq_out_nt_10"
+	# root_path = "/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/ACC_EFFQ/November10_2025/slide15_November11_2025_effq_out_nt_10"
+	root_path = "/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/ACC_EFFQ/November10_2025/torch_clamp_spreadT"
 
 	# initialize the variables to store the deltaQ and dQ_over_Q
 	deltaQ_10x10_4x4x2, dQ_over_Q_10x10_4x4x2 = None, None
@@ -240,33 +242,33 @@ def effq_accuracy_evaluation():
 		saveHDF5 = True
 		##
 		## SAME DIFFUSION COEFF
-		path_to_ref = '/'.join([root_path, '10x10_2x2x2_tdrift20.npz'])
-		path_to_10x10_4x4x2 = '/'.join([root_path, '10x10_4x4x2_tdrift20.npz'])
-		output_file_10x10_hdf5 = '/'.join([root_path, 'HDF5/EffectiveCharge_10x10_4x4x2_tdrift20.hdf5'])
+		path_to_ref = '/'.join([root_path, '10x10_2x2x2.npz'])
+		path_to_10x10_4x4x2 = '/'.join([root_path, '10x10_4x4x2.npz'])
+		output_file_10x10_hdf5 = '/'.join([root_path, 'HDF5/EffectiveCharge_10x10_4x4x2.hdf5'])
 		acc_effq_eval.npz2hdf5(npz_data=path_to_10x10_4x4x2, npz_ref=path_to_ref, saveHDF5=saveHDF5, output_hdf5=output_file_10x10_hdf5, getEffq=getEffq)
 
-		path_to_ref = '/'.join([root_path, '10x10_2x2x2_tdrift20.npz'])
-		path_to_8x8_2x2x2_tdrift20 = '/'.join([root_path, '8x8_2x2x2_tdrift20.npz'])
-		output_file_8x8_tdrift20 = '/'.join([root_path, 'HDF5/EffectiveCharge_8x8_2x2x2_tdrift20.hdf5'])
+		path_to_ref = '/'.join([root_path, '10x10_2x2x2.npz'])
+		path_to_8x8_2x2x2_tdrift20 = '/'.join([root_path, '8x8_2x2x2.npz'])
+		output_file_8x8_tdrift20 = '/'.join([root_path, 'HDF5/EffectiveCharge_8x8_2x2x2.hdf5'])
 		acc_effq_eval.npz2hdf5(npz_data=path_to_8x8_2x2x2_tdrift20, npz_ref=path_to_ref, saveHDF5=saveHDF5, output_hdf5=output_file_8x8_tdrift20, getEffq=getEffq)
 
 		# no cut 
-		path_to_ref_nocut = '/'.join([root_path, '10x10_2x2x2_tdrift20.npz'])
-		path_to_6x6_2x2x2_tdrift20 = '/'.join([root_path, '6x6_2x2x2_tdrift20.npz'])
-		output_file_6x6_2x2x2_tdrift20 = '/'.join([root_path, 'HDF5/EffectiveCharge_6x6_2x2x2_tdrift20.hdf5'])
+		path_to_ref_nocut = '/'.join([root_path, '10x10_2x2x2.npz'])
+		path_to_6x6_2x2x2_tdrift20 = '/'.join([root_path, '6x6_2x2x2.npz'])
+		output_file_6x6_2x2x2_tdrift20 = '/'.join([root_path, 'HDF5/EffectiveCharge_6x6_2x2x2.hdf5'])
 		acc_effq_eval.npz2hdf5(npz_data=path_to_6x6_2x2x2_tdrift20, npz_ref=path_to_ref_nocut, saveHDF5=saveHDF5, output_hdf5=output_file_6x6_2x2x2_tdrift20, getEffq=getEffq)
 
-		## 1x1x1 10x10 effq_out_nt_10
-		path_to_ref = '/'.join([root_path, '10x10_2x2x2_tdrift20.npz'])
-		path_to_10x10_4x4x2 = '/'.join([root_path, '10x10_1x1x1_tdrift20.npz'])
-		output_file_10x10_hdf5 = '/'.join([root_path, 'HDF5/EffectiveCharge_10x10_1x1x1_tdrift20.hdf5'])
-		acc_effq_eval.npz2hdf5(npz_data=path_to_10x10_4x4x2, npz_ref=path_to_ref, saveHDF5=saveHDF5, output_hdf5=output_file_10x10_hdf5, getEffq=getEffq)
+		# ## 1x1x1 10x10 effq_out_nt_10
+		# path_to_ref = '/'.join([root_path, '10x10_2x2x2_tdrift20.npz'])
+		# path_to_10x10_4x4x2 = '/'.join([root_path, '10x10_1x1x1_tdrift20.npz'])
+		# output_file_10x10_hdf5 = '/'.join([root_path, 'HDF5/EffectiveCharge_10x10_1x1x1_tdrift20.hdf5'])
+		# acc_effq_eval.npz2hdf5(npz_data=path_to_10x10_4x4x2, npz_ref=path_to_ref, saveHDF5=saveHDF5, output_hdf5=output_file_10x10_hdf5, getEffq=getEffq)
 
 	else:
-		hdf5_file_10x10 = '/'.join([root_path, 'HDF5/EffectiveCharge_10x10_4x4x2_tdrift20.hdf5'])
-		hdf5_file_8x8 = '/'.join([root_path, 'HDF5/EffectiveCharge_8x8_2x2x2_tdrift20.hdf5'])
-		hdf5_file_6x6 = '/'.join([root_path, 'HDF5/EffectiveCharge_6x6_2x2x2_tdrift20.hdf5'])
-		hdf5_file_10x10_1x1x1 = '/'.join([root_path, 'HDF5/EffectiveCharge_10x10_1x1x1_tdrift20.hdf5'])
+		hdf5_file_10x10 = '/'.join([root_path, 'HDF5/EffectiveCharge_10x10_4x4x2.hdf5'])
+		hdf5_file_8x8 = '/'.join([root_path, 'HDF5/EffectiveCharge_8x8_2x2x2.hdf5'])
+		hdf5_file_6x6 = '/'.join([root_path, 'HDF5/EffectiveCharge_6x6_2x2x2.hdf5'])
+		# hdf5_file_10x10_1x1x1 = '/'.join([root_path, 'HDF5/EffectiveCharge_10x10_1x1x1_tdrift20.hdf5'])
 
 		deltaQ_10x10_4x4x2, dQ_over_Q_10x10_4x4x2, high_dQ_over_Q_10x10, Npix_tot_10x10, Npix_belowthr_10x10 = acc_effq_eval.load_Q_fromHDF5(hdf5_file=hdf5_file_10x10, cut_on_Qref=cut_on_Q, getEffq=getEffq)
 
@@ -274,7 +276,7 @@ def effq_accuracy_evaluation():
 
 		deltaQ_6x6_2x2x2, dQ_over_Q_6x6_2x2x2, high_dQ_over_Q_10x10_nocut, Npix_tot_10x10_nocut, Npix_belowthr_10x10_nocut = acc_effq_eval.load_Q_fromHDF5(hdf5_file=hdf5_file_6x6, cut_on_Qref=cut_on_Q, getEffq=getEffq)
 
-		deltaQ_10x10_1x1x1, dQ_over_Q_10x10_1x1x1, _, _, _ = acc_effq_eval.load_Q_fromHDF5(hdf5_file=hdf5_file_10x10_1x1x1, cut_on_Qref=cut_on_Q, getEffq=getEffq)
+		# deltaQ_10x10_1x1x1, dQ_over_Q_10x10_1x1x1, _, _, _ = acc_effq_eval.load_Q_fromHDF5(hdf5_file=hdf5_file_10x10_1x1x1, cut_on_Qref=cut_on_Q, getEffq=getEffq)
 
 		## Save data from hdf5 to .json for easy access later
 		data_dict = {
@@ -297,8 +299,8 @@ def effq_accuracy_evaluation():
 		## SAME DIFFUSION COEFF
 		delta_Q_list = [(deltaQ_10x10_4x4x2, '(4,4,2) x (10,10)', 'red', None), #, 8.8 cm2 Transversal diff coeff
 				  		(deltaQ_8x8_2x2x2, '(2,2,2) x (8,8)', 'green', '--'),
-						  (deltaQ_6x6_2x2x2, '(2,2,2) x (6,6)', 'blue', ':'),
-						  (deltaQ_10x10_1x1x1, '(1,1,1) x (10,10)', 'purple', '-.')]
+						  (deltaQ_6x6_2x2x2, '(2,2,2) x (6,6)', 'blue', ':'),]
+						#   (deltaQ_10x10_1x1x1, '(1,1,1) x (10,10)', 'purple', '-.')]
 						# (deltaQ_8x8_2x2x2, '(2,2,2) x (8,8)', 'green'),
 						# (deltaQ_6x6_2x2x2, '(2,2,2) x (6,6)', 'blue')]
 		output_file = '/'.join([root_path, 'HDF5/deltaQ_overlay_10x10_8x8_6x6.png'])
@@ -459,7 +461,7 @@ def separation_by_time():
 		plt.close()
 	
 def runtime_chunksum():
-	path_to_file = '/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/CHUNKSUM_EVAL/'
+	path_to_file = '/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/CHUNKSUM_EVAL/combined'
 	chunksum_eval.get_runtime_chunksum_i(path_to_file=path_to_file, output_path='tests/')
 
 	# chunksum_eval.get_runtime_chunksum_qblock(path_to_file=path_to_file, output_path='../tests/')
@@ -467,9 +469,9 @@ def runtime_chunksum():
 
 if __name__ == '__main__':
 	# effq_accuracy_evaluation()
-	# runtime_evaluation()
+	runtime_evaluation()
 	# memory_evaluation()
-	runtime_chunksum()
+	# runtime_chunksum()
 
 	#-------- Tests ----
 	# effq_accuracy_eval_diffent_diffCoeff()
