@@ -157,7 +157,7 @@ def overlay_hists_deltaQ(*deltaQ_list, title, xlabel, ylabel, output_file=''):
 
 		if linestyle is None:
 			linestyle='-'
-		plt.hist(all_tpcs_deltaQ, bins=100, histtype='step', color=color, label=label, linewidth=2, linestyle=linestyle)
+		plt.hist(all_tpcs_deltaQ, bins=100, histtype='step', color=color, label=label, linewidth=1.5, linestyle=linestyle)
 		# ax[1].hist(all_tpcs_deltaQ, bins=100, histtype='step', color=color, label=label)
 		# plt.hist(deltaQ, bins=100, range=(-1000, 1000), histtype='step', color=color, label=label)
 	plt.xlabel(xlabel, fontsize=24)
@@ -177,7 +177,7 @@ def overlay_hists_deltaQ(*deltaQ_list, title, xlabel, ylabel, output_file=''):
 def effq_evaluation(path_to_file: str=''):
 	data = load_json(path_to_file) ## load effq_accuracy_data.json
 	colors = ['maroon', 'green', 'red', 'purple', 'black', 'blue', 'orange']
-	linestyles = ['-', '--', '-.', ':', '-', '--', '-.']
+	linestyles = ['solid', 'dotted', 'dashed', 'dashdot', 'loosely dashed']
 	list_of_deltaQ_tuple = []
 	list_of_dQ_over_Q_tuple = []
 	for i, key in enumerate(data.keys()):
@@ -221,12 +221,12 @@ def runtime_chunksum(path_to_file: str=''):
 
 if __name__ == "__main__":
 	## Peak memory evaluation without dynamic chunking and batching
-	input_path_peakmem = 'data4plots/peakmem_vs_Nsegments_nodynamic_chunking_batching.json'  ## path to peakmem_vs_Nsegments_nodynamic_chunking_batching.json
-	benchmark_peak_memory_nodynamic_chunking_and_batching(input_path_peakmem)
+	# input_path_peakmem = 'data4plots/peakmem_vs_Nsegments_nodynamic_chunking_batching.json'  ## path to peakmem_vs_Nsegments_nodynamic_chunking_batching.json
+	# benchmark_peak_memory_nodynamic_chunking_and_batching(input_path_peakmem)
 
-	## Runtime evaluation
-	input_path_runtime = 'data4plots/runtime_vs_Nsegments.json'  ## path to runtime_vs_Nsegments.json
-	benchmark_runtime(input_path_runtime)
+	# ## Runtime evaluation
+	# input_path_runtime = 'data4plots/runtime_vs_Nsegments.json'  ## path to runtime_vs_Nsegments.json
+	# benchmark_runtime(input_path_runtime)
 
 	# input_path_runtime = 'data4plots/runtime_majorOps_batchsize8192_NBCHUNK100_NBCHUNKCONV50.json'  ## path to runtime_majorOps_batchsize8192_NBCHUNK100_NBCHUNKCONV50.json
 	# runtimeshare_majorOp(input_path_runtime)
@@ -235,7 +235,7 @@ if __name__ == "__main__":
 	path_to_file = 'data4plots/effq_accuracy_data_effq_out_nt_10.json'
 	effq_evaluation(path_to_file)
 
-	## Chunksum runtime evaluation
-	path_to_file = 'data4plots/chunksum_i_runtime_vs_Nbins.json'
-	runtime_chunksum(path_to_file)
+	# ## Chunksum runtime evaluation
+	# path_to_file = 'data4plots/chunksum_i_runtime_vs_Nbins.json'
+	# runtime_chunksum(path_to_file)
 	
