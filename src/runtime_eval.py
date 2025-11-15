@@ -33,6 +33,8 @@ def get_runtime_perbatch(data: dict):
 				for key2, value2 in value1.items():
 					if not isinstance(value2, dict):
 						continue
+					if value2['event_id'] != 1002:
+						continue
 					event_ids.append(value2['event_id'])
 					N_segments.append(value2['N_segments'])
 					N_qblocks.append(value2['N_qblock'])
