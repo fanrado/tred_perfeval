@@ -180,69 +180,6 @@ def npz2hdf5(npz_data, npz_ref, saveHDF5=False, output_hdf5='', getEffq=False):
 			print('Error extracting charges for TPC ', itpc)
 			print(data_tpc, ref_data_tpc, pix_locs_array)
 			# all_tpc_data[itpc] = tpc_array
-	###------------------------------- WORKING BUT SLOW -------------------------------
-	# for itpc in all_tpc_data.keys():
-	# 	print('Processing ', itpc)
-	# 	data_tpc = data[itpc]
-	# 	ref_data_tpc = ref_data[itpc]
-	# 	pix_locs_array = get_all_pixels_locations(data_tpc, ref_data_tpc)
-	# 	print('Total unique pixel locations in ', itpc, ': ', len(pix_locs_array))
-	# 	# Saving Q, Qref, pixLocs, pixLocs_ref from each tpc
-	# 	Q_tpc = np.array([], dtype=np.float32)
-	# 	Qref_tpc =  np.array([], dtype=np.float32)
-	# 	pixLocs_tpc = np.array([], dtype=np.int32)
-	# 	pixLocs_ref_tpc = np.array([], dtype=np.int32)
-	# 	# Npix += len(pix_locs_array) # increment the total number of pixels
-	# 	# print(Npix, ' total pixels so far.')
-	# 	for pix_loc in pix_locs_array:
-	# 		# try:
-	# 		# print(f'Processing pixel location: {pix_loc}')
-	# 		locs_in_data = np.where(np.all(data_tpc['pixels_locations']==pix_loc, axis=1))[0]
-	# 		locs_in_ref = np.where(np.all(ref_data_tpc['pixels_locations']==pix_loc, axis=1))[0]
-	# 		if len(locs_in_data)==0:
-	# 			tmp_charge = np.array([(pix_loc, 0.0)], dtype=data_tpc.dtype)
-	# 			data_tpc = rfn.stack_arrays((data_tpc, tmp_charge), usemask=False)
-	# 		if len(locs_in_ref)==0:
-	# 			tmp_charge = np.array([(pix_loc, 0.0)], dtype=ref_data_tpc.dtype)
-	# 			ref_data_tpc = rfn.stack_arrays((ref_data_tpc, tmp_charge), usemask=False)
-		
-	# 		locs_in_data = np.where(np.all(data_tpc['pixels_locations']==pix_loc, axis=1))[0]
-	# 		locs_in_ref = np.where(np.all(ref_data_tpc['pixels_locations']==pix_loc, axis=1))[0]
-			
-	# 		charge_in_ref = np.sum(ref_data_tpc[metric_name][locs_in_ref])
-	# 		charge_in_data = np.sum(data_tpc[metric_name][locs_in_data])
-
-	# 		# print(locs_in_data, ' charge in data for pixel ', pix_loc, ': ', charge_in_data, ' ke-.', locs_in_ref, ' charge in ref: ', charge_in_ref, ' ke-.')r
-	# 		# if charge_in_ref < cut_onQ:
-	# 		# 	Npix_below_thr += 1 # increment the number of pixels below threshold
-	# 		# else: # only consider pixels where the reference charge is above the threshold
-	# 		if len(Q_tpc)==0:
-	# 			Q_tpc = np.array([charge_in_data], dtype=np.float32)
-	# 			Qref_tpc = np.array([charge_in_ref], dtype=np.float32)
-	# 			pixLocs_tpc = np.array([pix_loc], dtype=np.int32)
-	# 			pixLocs_ref_tpc = np.array([pix_loc], dtype=np.int32)
-	# 		else:
-	# 			Q_tpc = np.concatenate((Q_tpc, [charge_in_data]))
-	# 			Qref_tpc = np.concatenate((Qref_tpc, [charge_in_ref]))
-	# 			pixLocs_tpc = np.concatenate((pixLocs_tpc, [pix_loc]))
-	# 			pixLocs_ref_tpc = np.concatenate((pixLocs_ref_tpc, [pix_loc]))
-	# 		# except:
-	# 		# 	print(f'Error processing pixel location: {pix_loc}')
-	# 		# 	pass
-		# --- ------------------------------- WORKING BUT SLOW -------------------------------
-
-		# tpc_array = np.zeros(len(Q_tpc), dtype=[('pixels_locations', np.int32, (3,)), ('pixels_locations_ref', np.int32, (3,)), (metric_name, np.float32), (f'{metric_name}_ref', np.float32)])
-		# if len(pixLocs_tpc) == 0:
-		# 	tpc_array['pixels_locations'] = pixLocs_tpc.reshape(0,3)
-		# 	tpc_array['pixels_locations_ref'] = pixLocs_ref_tpc.reshape(0,3)
-		# 	tpc_array[metric_name] = Q_tpc[:]
-		# 	tpc_array[f'{metric_name}_ref'] = Qref_tpc[:]	
-		# else:
-		# 	tpc_array['pixels_locations'] = pixLocs_tpc[:]
-		# 	tpc_array['pixels_locations_ref'] = pixLocs_ref_tpc[:]
-		# 	tpc_array[metric_name] = Q_tpc[:]
-		# 	tpc_array[f'{metric_name}_ref'] = Qref_tpc[:]
-		# all_tpc_data[itpc] = tpc_array
 
 	if saveHDF5:
 		with h5py.File(output_hdf5, 'w') as f:
@@ -310,7 +247,7 @@ def load_Q_fromHDF5(hdf5_file='', cut_on_Qref=1, getEffq=False): # ke-
 				if np.abs(deltaQ_) > cut_on_deltaQ: # collect Q and Qref for Q distribution plot
 					Q_array = np.concatenate((Q_array, np.array([charge_in_data], dtype=np.float32)), axis=0)
 					Qref_array = np.concatenate((Qref_array, np.array([charge_in_ref], dtype=np.float32)), axis=0)
-
+				
 				# if all_Qref[i] < cut_on_Qref:
 				# 	continue
 				if charge_in_ref < cut_on_Qref:
@@ -330,19 +267,19 @@ def load_Q_fromHDF5(hdf5_file='', cut_on_Qref=1, getEffq=False): # ke-
 			high_dQ_over_Q_allTPCs[itpc]['dQ_over_Q'] = np.array(high_dQ_over_Q_allTPCs[itpc]['dQ_over_Q'], dtype=np.float32)
 			high_dQ_over_Q_allTPCs[itpc]['pixel_locs'] = np.array(high_dQ_over_Q_allTPCs[itpc]['pixel_locs'], dtype=np.int32)
 	# sys.exit()
-	plot_dist = False
+	plot_dist = True
 	if plot_dist:
 		xlabel = 'Accumulated Charge'
 		if getEffq:
 			xlabel = 'Effective Charge'
 		title = hdf5_file.split('/')[-1].replace('.hdf5', '')
-		list_Q = [(Q_allTPCs, 'Q, DT = 88 cm2/s', 'blue'), (Qref_allTPCs, r'$Q_{ref}$, DT = 8.8 cm2/s', 'orange')]
+		list_Q = [(Q_allTPCs, 'Q', 'blue', None), (Qref_allTPCs, r'$Q_{ref}$', 'orange', None)]
 		output_file = hdf5_file.replace('.hdf5', '_Q_distribution.png')
 		overlay_hists_deltaQ(*list_Q, title=title, xlabel=f'{xlabel} [ke-]', ylabel='Counts', output_file=output_file)
 	
 	plot_Q_vs_Qref = True
 	if plot_Q_vs_Qref:
-		print(Q_array, Qref_array)
+		# print(Q_array, Qref_array)
 		title = hdf5_file.split('/')[-1].replace('.hdf5', '')
 		# Calculate the range of your data
 		x_min, x_max = np.min(Q_array), np.max(Q_array)
@@ -385,7 +322,7 @@ def overlay_hists_deltaQ(*deltaQ_list, title, xlabel, ylabel, output_file=''):
 			ylabel (str): Label for the y-axis.
 			output_file (str): Filename to save the plot.
 	"""
-	print(len(deltaQ_list))
+	# print(len(deltaQ_list))
 	plt.figure(figsize=(10, 6))
 	for (deltaQ, label, color, linestyle) in deltaQ_list:
 		## concatenate the accumulated charge from all TPCs
