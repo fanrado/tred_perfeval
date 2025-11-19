@@ -134,9 +134,10 @@ def benchmark_peak_memory_nodynamic_chunking_and_batching(input_path: str):
 	"""
 	Benchmark peak memory usage without dynamic chunking and batching.
 	"""
-	list_of_files = [f for f in os.listdir(input_path) if f.endswith('.json')]
+	list_of_files = [f for f in os.listdir(input_path) if (f.endswith('.json') and (f.startswith('peak_memory_usage')))]
 	list_of_tuple_data = []
-	colors = ['red', 'green', 'black', 'purple', 'yellow', 'maroon']
+	list_of_tuple_data_Nqblock = []
+	colors = ['red', 'green', 'black', 'purple', 'yellow', 'maroon', 'orange', 'brown', 'pink', 'gray', 'olive', 'cyan', 'blue', 'teal']
 	title = None
 	for i,f in enumerate(list_of_files):
 		if f=='peak_memory_usage_batch8192_nbchunk50_nbchunkconv10.json':
@@ -154,6 +155,8 @@ def benchmark_peak_memory_nodynamic_chunking_and_batching(input_path: str):
 		# else:
 		tuple_data = (organized_data['N_segments'], organized_data['peak_memory_perbatch'], label, colors[i])
 		list_of_tuple_data.append(tuple_data)
+		list_of_tuple_data_Nqblock.append((organized_data['N_qblocks'], organized_data['peak_memory_perbatch'], label, colors[i]))
+		
 	## Save the data in a json
 	data_dict = {}
 	for x_data, y_data, label, color in list_of_tuple_data:
@@ -166,6 +169,9 @@ def benchmark_peak_memory_nodynamic_chunking_and_batching(input_path: str):
 		json.dump(data_dict, f, indent=4)
 
 	overlay_plots(*list_of_tuple_data, title=f'Peak memory vs N_segments, {title}', xlabel='N segments', ylabel='Peak Memory (MB)', output_file='/'.join([input_path, 'peakmem_vs_Nsegments_nodynamic_chunking_batching.png']), nodynChunkBatch=True)
+	#
+	# plot peak memory vs N_qblocks
+	overlay_plots(*list_of_tuple_data_Nqblock, title=f'Peak memory vs N qblocks, {title}', xlabel='N qblocks', ylabel='Peak Memory (MB)', output_file='/'.join([input_path, 'peakmem_vs_Nqblocks_nodynamic_chunking_batching.png']), nodynChunkBatch=True)
 
 def benchmark_peak_memory_dynamic_chunking_and_batching(input_path: str):
 	"""
