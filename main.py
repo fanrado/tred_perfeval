@@ -76,7 +76,8 @@ def effq_accuracy_eval_with_diffusion_cap():
 def memory_evaluation():
 	# Peak memory usage ----
 	# input_dir = '/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/MEMORY_EVAL/preliminary/no_dynBatchChunk/benchmark_plot'
-	input_dir = '/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/MEMORY_EVAL/to_use'
+	# input_dir = '/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/MEMORY_EVAL/Benchmark_November14_2025/to_use'
+	input_dir = '/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/MEMORY_EVAL/MemCons_5x5_FR_nodynChunkBatch/convo_8x8x2560/to_use'
 	
 	peakmem_eval.benchmark_peak_memory_nodynamic_chunking_and_batching(input_path=input_dir)
 	# input_dir = "/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/MEMORY_EVAL/benchmark_plot_dynChunkBatch/files_plot"
@@ -88,7 +89,8 @@ def memory_evaluation():
 def runtime_evaluation():
 	## Runtime evaluation ----
 	## PIECHART RUNTIME for one event
-	input_dir = '/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/RUNTIME_EVAL/off'
+
+	input_dir = '/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/RUNTIME_EVAL/Runtime_5x5_FR_convo8x8x2560/'
 	# input_dir = '/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/RUNTIME_EVAL/preliminary/benchmark_plot/new_benchmark_plot'
 	# input_subdir = 'runon_wcgpu1'
 	input_subdir = ''
@@ -97,14 +99,14 @@ def runtime_evaluation():
 	data = load_json(input_file=input_file)
 	runtime_majorOps = runtime_eval.get_runtime_majorOperations(data=data)
 	# save the major ops runtime data in a json
-	output_file_json = '/'.join([input_dir, input_subdir, 'runtime_majorOps_batchsize8192_NBCHUNK100_NBCHUNKCONV50.json'])
+	output_file_json = '/'.join([input_dir, input_subdir, 'runtime_majorOps_batchsize8192_NBCHUNK100_NBCHUNKCONV50_details.json'])
 	save_json(output_file=output_file_json, data=runtime_majorOps)
-	#
-	runtime_eval.runtimeshare_majorOp(organized_data=runtime_majorOps, output_file='/'.join([input_dir, input_subdir, 'runtime_share_majorOps.png']))
+	runtime_eval.runtimeshare_majorOp_details(organized_data=runtime_majorOps, output_file='/'.join([input_dir, input_subdir, 'runtime_share_majorOps_details.png']))
+
 	## Overlay of the runtime for different batch schemes
 	# input_dir = '/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/RUNTIME_EVAL/preliminary/benchmark_plot/new_benchmark_plot'
-	input_dir = '/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/RUNTIME_EVAL/off'
-	runtime_eval.benchmark_runtime(input_path=input_dir)
+	# input_dir = '/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/RUNTIME_EVAL/Runtime_5x5_FR_convo8x8x2560/nbchunk_conv_10'
+	# runtime_eval.benchmark_runtime(input_path=input_dir)
 
 def effq_accuracy_eval_cuton_drifttime():
 	# root_path = "/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/ACC_EFFQ/cut_on_drifttime_30_100_nocut_event1003"
@@ -463,18 +465,18 @@ def separation_by_time():
 		plt.close()
 	
 def runtime_chunksum():
-	path_to_file = '/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/CHUNKSUM_EVAL/combined'
-	chunksum_eval.get_runtime_chunksum_i(path_to_file=path_to_file, output_path='tests/')
+	path_to_file = '/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/CHUNKSUM_EVAL/'
+	# chunksum_eval.get_runtime_chunksum_i(path_to_file=path_to_file, output_path='tests/')
 
-	# chunksum_eval.get_runtime_chunksum_qblock(path_to_file=path_to_file, output_path='../tests/')
+	chunksum_eval.get_runtime_chunksum_qblock(path_to_file=path_to_file, output_path='tests/')
 	# chunksum_eval.get_runtime_chunksum_readout(path_to_file=path_to_file, output_path='../tests/')
 
 if __name__ == '__main__':
-	effq_accuracy_evaluation()
+	# effq_accuracy_evaluation()
 	# runtime_evaluation()
 	# memory_evaluation()
+	runtime_chunksum()
 	# runtime_chunksum()
-
 	#-------- Tests ----
 	# effq_accuracy_eval_diffent_diffCoeff()
 	# effq_accuracy_eval_with_diffusion_cap()
