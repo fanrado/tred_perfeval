@@ -44,7 +44,7 @@ def overlay_plots_mem(*args, title='', xlabel='', ylabel='', output_file='overla
 	plt.xlabel(xlabel, fontsize=24)
 	plt.ylabel(ylabel, fontsize=24)
 	plt.title(title, fontsize=24)
-	plt.ylim([-500, 25000])
+	# plt.ylim([-500, 25000])
 	plt.xticks(fontsize=24)
 	plt.yticks(fontsize=24)
 	
@@ -83,7 +83,7 @@ def overlay_plots_runtime(*args, title, xlabel, ylabel,output_file=''):
 	plt.xlabel(xlabel, fontsize=24)
 	plt.ylabel(ylabel, fontsize=24)
 	plt.title(title, fontsize=24)
-	plt.ylim([-1, 15])
+	# plt.ylim([-1, 8])
 	plt.xticks(fontsize=24)
 	plt.yticks(fontsize=24)
 	plt.tight_layout()
@@ -99,7 +99,7 @@ def benchmark_runtime(path_to_file: str=''):
 	}
 	data = load_json(path_to_file) ## load runtime_vs_Nsegments.json
 	list_of_tuple_data = []
-	colors 					= ['maroon', 'green', 'black', 'purple', 'red', 'blue', 'orange']
+	colors 					= ['maroon', 'green', 'black', 'purple', 'red', 'blue', 'orange', 'brown', 'pink', 'gray', 'olive', 'cyan']
 	for i, key in enumerate(data.keys()):
 		x_data = np.array(data[key]['N_segments'])
 		y_data = np.array(data[key]['runtimes_perbatch'])
@@ -224,16 +224,16 @@ if __name__ == "__main__":
 	# input_path_peakmem = 'data4plots/peakmem_vs_Nsegments_nodynamic_chunking_batching.json'  ## path to peakmem_vs_Nsegments_nodynamic_chunking_batching.json
 	# benchmark_peak_memory_nodynamic_chunking_and_batching(input_path_peakmem)
 
-	# ## Runtime evaluation
-	# input_path_runtime = 'data4plots/runtime_vs_Nsegments.json'  ## path to runtime_vs_Nsegments.json
+	## Runtime evaluation
+	# input_path_runtime = 'data4plots/runtime_vs_Nsegments_all.json'  ## path to runtime_vs_Nsegments.json
 	# benchmark_runtime(input_path_runtime)
 
-	# input_path_runtime = 'data4plots/runtime_majorOps_batchsize8192_NBCHUNK100_NBCHUNKCONV50.json'  ## path to runtime_majorOps_batchsize8192_NBCHUNK100_NBCHUNKCONV50.json
-	# runtimeshare_majorOp(input_path_runtime)
+	input_path_runtime = 'data4plots/convo_8x8x2560/runtime_majorOps_batchsize8192_NBCHUNK100_NBCHUNKCONV50.json'  ## path to runtime_majorOps_batchsize8192_NBCHUNK100_NBCHUNKCONV50.json
+	runtimeshare_majorOp(input_path_runtime)
 
-	## Effective charge evaluation
-	path_to_file = 'data4plots/effq_accuracy_data_effq_out_nt_10.json'
-	effq_evaluation(path_to_file)
+	# ## Effective charge evaluation
+	# path_to_file = 'data4plots/effq_accuracy_data_effq_out_nt_10.json'
+	# effq_evaluation(path_to_file)
 
 	# ## Chunksum runtime evaluation
 	# path_to_file = 'data4plots/chunksum_i_runtime_vs_Nbins.json'
