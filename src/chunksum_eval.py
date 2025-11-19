@@ -30,14 +30,17 @@ def get_chunksum_runtime(data_json: dict, output_path: str='../tests'):
 	runtime_chunksum_readout_sec = []
 	runtime_chunksum_qblock_sec  = []
 	runtime_chunksum_i_sec       = []
+	runtime_sum_current = []
 	## Process the TPC data_json
 	for key, value in data_json.items():
 		# print(f'key : {key}')
 		## TPC level
+		# runtimes_perbatch.append(value['runtime_per_batch']) ## runtime_sec replaces peak_memory_MB
 		for key1, value1 in value.items():
 			if not isinstance(value1, dict):
 				continue
-
+			# print(value.keys())
+			# sys.exit()
 			## Batch level
 			for key2, value2 in value1.items():
 				if not isinstance(value2, dict):
@@ -50,25 +53,32 @@ def get_chunksum_runtime(data_json: dict, output_path: str='../tests'):
 				runtime_chunksum_readout_sec.append(value2['each_operation_sec']['chunksum_readout_sec'])
 				t_chunksum_qblock_perbatch = 0.0
 				t_chunksum_i_perbatch = 0.0
+				t_sumcurrent_perbatch = 0.0 ## summing per batch
 				# print('--')
 				for ibatch, batch_data in value2['each_operation_sec'].items():
 					if not isinstance(batch_data, dict):
 						continue
 					## Under chunking conv
 					tmp_chunksum_qblock_sec = 0.0
+					tmp_sumcurrent_sec = 0.0
 					for ichunk, chunk_data in batch_data.items():
 						# print(ichunk)
 						# print(ichunk, chunk_data['chunksum_qblock_sec'])
 						tmp_chunksum_qblock_sec += chunk_data['chunksum_qblock_sec']
+						tmp_sumcurrent_sec += chunk_data['sumcurrent_sec']
 						ichunk_chunksum_i_sec = 0.0
-
+						continue
 						for keyfinal, val_final in chunk_data['conv_sec']['details'].items():
 							# print(f'---- {keyfinal} : {val_final}')
 							ichunk_chunksum_i_sec += val_final['chunksum_i_time']
 						t_chunksum_i_perbatch += ichunk_chunksum_i_sec
 					t_chunksum_qblock_perbatch += tmp_chunksum_qblock_sec
+					t_sumcurrent_perbatch += tmp_sumcurrent_sec ## summing per batch
+
 				runtime_chunksum_qblock_sec.append(t_chunksum_qblock_perbatch)
 				runtime_chunksum_i_sec.append(t_chunksum_i_perbatch)
+				runtime_sum_current.append(t_sumcurrent_perbatch)
+
 	## plot distributions of the runtimes
 	output_dist = f'{output_path}/dist_runtime_chunksum/{chunksum_readout_shape}_{chunksum_qblock_shape}_{chunksum_i_shape}_dist.png'
 	plot_dist = True
@@ -104,14 +114,17 @@ def get_chunksum_runtime(data_json: dict, output_path: str='../tests'):
 		'runtime_chunksum_qblock_sec_mean' : np.mean(runtime_chunksum_qblock_sec),
 		'runtime_chunksum_qblock_sec_std'  : np.std(runtime_chunksum_qblock_sec),
 		'runtime_chunksum_i_sec_mean'      : np.mean(runtime_chunksum_i_sec),
-		'runtime_chunksum_i_sec_std'       : np.std(runtime_chunksum_i_sec)
+		'runtime_chunksum_i_sec_std'       : np.std(runtime_chunksum_i_sec),
+		'runtime_perbatch_sec_mean'      : np.mean(runtimes_perbatch),
+		'runtime_sumcurrent_sec_mean'      : np.mean(runtime_sum_current),
 	}
 	return Runtime_summary
 
 def plot_chunksum_runtime_vs_Nbins(Nbins: list, t_mean: list, t_std: list, output_path: str, xlabel: str='Number of bins', ylabel: str='Runtime (sec)', title: str='Chunksum Runtime vs Number of bins', filename: str='chunksum_runtime_vs_Nbins.png'):
 	plt.figure(figsize=(10, 8))
 	hep.style.use("CMS") 
-	plt.errorbar(Nbins, t_mean, yerr=t_std, fmt='o--', ecolor='r', capsize=5, label=r'Mean $\pm stdev$')
+	# plt.errorbar(Nbins, t_mean, yerr=t_std, fmt='o--', ecolor='r', capsize=5, label=r'Mean $\pm stdev$')
+	plt.errorbar(Nbins, t_mean, yerr=None, fmt='o--', ecolor='r', capsize=5, label=r'Average of runtime per batch')
 	# plt.plot(Nbins_sorted, t_mean_sorted, '*--', label=r'Mean $\pm stdev$')
 	plt.xlabel(xlabel, fontsize=20)
 	plt.ylabel(ylabel, fontsize=20)
@@ -129,12 +142,15 @@ def get_runtime_chunksum_qblock(path_to_file: str, output_path: str):
 	Nbins 	= []
 	t_mean 	= []
 	t_std 	= []
+	runtime_per_batch = []
 	for f in list_json:
 		runtime = get_chunksum_runtime(data_json=load_json(os.path.join(path_to_file, f)), output_path=output_path)
 		if runtime['Nbin_chunksum_qblock'] not in Nbins:
 			Nbins.append(runtime['Nbin_chunksum_qblock'])
 			t_mean.append(runtime['runtime_chunksum_qblock_sec_mean'])
 			t_std.append(runtime['runtime_chunksum_qblock_sec_std'])
+			runtime_per_batch.append(runtime['runtime_perbatch_sec_mean'])
+
 	Nbins_dict = {index: Nbin for index, Nbin in enumerate(Nbins)}
 	sorted_indices = sorted(Nbins_dict, key=Nbins_dict.get)
 	Nbins_sorted = [Nbins_dict[i] for i in sorted_indices]
@@ -157,6 +173,8 @@ def get_runtime_chunksum_i(path_to_file: str, output_path: str):
 	Nbins 	= []
 	t_mean 	= []
 	t_std 	= []
+	runtime_per_batch = []
+	runtime_sum_current = []
 	for f in list_json:
 		runtime = get_chunksum_runtime(data_json=load_json(os.path.join(path_to_file, f)), output_path=output_path)
 		# print(runtime)
@@ -167,6 +185,15 @@ def get_runtime_chunksum_i(path_to_file: str, output_path: str):
 			Nbins.append(runtime['Nbin_chunksum_i'])
 			t_mean.append(runtime['runtime_chunksum_i_sec_mean'])
 			t_std.append(runtime['runtime_chunksum_i_sec_std'])
+			runtime_per_batch.append(runtime['runtime_perbatch_sec_mean'])
+			runtime_sum_current.append(runtime['runtime_sumcurrent_sec_mean'])
+	plt.figure(figsize=(10, 8))
+	# plt.scatter(Nbins, runtime_per_batch)
+	plt.scatter(Nbins, runtime_sum_current)
+	plt.savefig('tests/runtime_sumcurrent_per_batch_vs_Nbins.png')
+	plt.close()
+	sys.exit()
+
 	Nbins_dict = {index: Nbin for index, Nbin in enumerate(Nbins)}
 	sorted_indices = sorted(Nbins_dict, key=Nbins_dict.get)
 	Nbins_sorted = [Nbins_dict[i] for i in sorted_indices]
