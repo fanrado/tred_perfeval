@@ -194,13 +194,14 @@ def effq_evaluation(path_to_file: str=''):
 	overlay_hists_deltaQ(*list_of_dQ_over_Q_tuple, title='dQ/Q Distribution', xlabel='dQ/Q', ylabel='Counts', output_file=output_file_dQ_over_Q)
 
 def runtime_chunksum(path_to_file: str=''):
-	xlabel = 'Number of bins in chunksum current'
+	xlabel = 'Number of bins in chunksum qblock'
 	ylabel = 'Runtime (sec)'
-	title = 'Chunksum current Runtime vs Number of bins'
+	title = 'Chunksum qblock Runtime vs Number of bins'
 	def plot_chunksum_runtime_vs_Nbins(Nbins: list, t_mean: list, t_std: list, output_path: str, xlabel: str='Number of bins', ylabel: str='Runtime (sec)', title: str='Chunksum Runtime vs Number of bins'):
 		plt.figure(figsize=(10, 8))
 		hep.style.use("CMS") 
-		plt.errorbar(Nbins, t_mean, yerr=t_std, fmt='o--', ecolor='r', capsize=5, label=r'Mean $\pm stdev$')
+		# plt.errorbar(Nbins, t_mean, yerr=t_std, fmt='o--', ecolor='r', capsize=5, label=r'Mean $\pm stdev$')
+		plt.errorbar(Nbins, t_mean, yerr=None, fmt='o--', ecolor='r', capsize=5, label=r'Average of runtime per batch')
 		# plt.plot(Nbins_sorted, t_mean_sorted, '*--', label=r'Mean $\pm stdev$')
 		plt.xlabel(xlabel, fontsize=24)
 		plt.ylabel(ylabel, fontsize=24)
@@ -228,14 +229,15 @@ if __name__ == "__main__":
 	# input_path_runtime = 'data4plots/runtime_vs_Nsegments_all.json'  ## path to runtime_vs_Nsegments.json
 	# benchmark_runtime(input_path_runtime)
 
-	input_path_runtime = 'data4plots/convo_8x8x2560/runtime_majorOps_batchsize8192_NBCHUNK100_NBCHUNKCONV50.json'  ## path to runtime_majorOps_batchsize8192_NBCHUNK100_NBCHUNKCONV50.json
-	runtimeshare_majorOp(input_path_runtime)
+	# input_path_runtime = 'data4plots/convo_8x8x2560/runtime_majorOps_batchsize8192_NBCHUNK100_NBCHUNKCONV50.json'  ## path to runtime_majorOps_batchsize8192_NBCHUNK100_NBCHUNKCONV50.json
+	# runtimeshare_majorOp(input_path_runtime)
 
 	# ## Effective charge evaluation
 	# path_to_file = 'data4plots/effq_accuracy_data_effq_out_nt_10.json'
 	# effq_evaluation(path_to_file)
 
-	# ## Chunksum runtime evaluation
+	## Chunksum runtime evaluation
 	# path_to_file = 'data4plots/chunksum_i_runtime_vs_Nbins.json'
-	# runtime_chunksum(path_to_file)
+	path_to_file = 'tests/tmp/chunksum_qblock_runtime_vs_Nbins.json'
+	runtime_chunksum(path_to_file)
 	

@@ -31,6 +31,8 @@ def get_chunksum_runtime(data_json: dict, output_path: str='../tests'):
 	runtime_chunksum_qblock_sec  = []
 	runtime_chunksum_i_sec       = []
 	runtime_sum_current = []
+	qblock_size = []
+
 	## Process the TPC data_json
 	for key, value in data_json.items():
 		# print(f'key : {key}')
@@ -67,6 +69,10 @@ def get_chunksum_runtime(data_json: dict, output_path: str='../tests'):
 						tmp_chunksum_qblock_sec += chunk_data['chunksum_qblock_sec']
 						tmp_sumcurrent_sec += chunk_data['sumcurrent_sec']
 						ichunk_chunksum_i_sec = 0.0
+						try:
+							qblock_size.append((chunk_data['qblock_shape_x'], chunk_data['qblock_shape_y'], chunk_data['qblock_shape_z']))
+						except:
+							pass
 						continue
 						for keyfinal, val_final in chunk_data['conv_sec']['details'].items():
 							# print(f'---- {keyfinal} : {val_final}')
@@ -78,10 +84,11 @@ def get_chunksum_runtime(data_json: dict, output_path: str='../tests'):
 				runtime_chunksum_qblock_sec.append(t_chunksum_qblock_perbatch)
 				runtime_chunksum_i_sec.append(t_chunksum_i_perbatch)
 				runtime_sum_current.append(t_sumcurrent_perbatch)
+	qblock_size_array = np.array(qblock_size, dtype=[('x', 'i4'), ('y', 'i4'), ('z', 'i4')])
 
 	## plot distributions of the runtimes
 	output_dist = f'{output_path}/dist_runtime_chunksum/{chunksum_readout_shape}_{chunksum_qblock_shape}_{chunksum_i_shape}_dist.png'
-	plot_dist = True
+	plot_dist = False
 	if plot_dist:
 		plt.figure(figsize=(15, 5))
 		plt.subplot(1, 3, 1)
@@ -117,6 +124,7 @@ def get_chunksum_runtime(data_json: dict, output_path: str='../tests'):
 		'runtime_chunksum_i_sec_std'       : np.std(runtime_chunksum_i_sec),
 		'runtime_perbatch_sec_mean'      : np.mean(runtimes_perbatch),
 		'runtime_sumcurrent_sec_mean'      : np.mean(runtime_sum_current),
+		'qblock_size': qblock_size_array
 	}
 	return Runtime_summary
 
@@ -128,6 +136,7 @@ def plot_chunksum_runtime_vs_Nbins(Nbins: list, t_mean: list, t_std: list, outpu
 	# plt.plot(Nbins_sorted, t_mean_sorted, '*--', label=r'Mean $\pm stdev$')
 	plt.xlabel(xlabel, fontsize=20)
 	plt.ylabel(ylabel, fontsize=20)
+	# plt.xlim([100, 500])
 	plt.title(title, fontsize=20)
 	plt.xticks(fontsize=15)
 	plt.yticks(fontsize=15)
@@ -143,14 +152,17 @@ def get_runtime_chunksum_qblock(path_to_file: str, output_path: str):
 	t_mean 	= []
 	t_std 	= []
 	runtime_per_batch = []
+	qblock_size = np.array([], dtype=[('x', 'i4'), ('y', 'i4'), ('z', 'i4')])
 	for f in list_json:
 		runtime = get_chunksum_runtime(data_json=load_json(os.path.join(path_to_file, f)), output_path=output_path)
 		if runtime['Nbin_chunksum_qblock'] not in Nbins:
+			if len(Nbins)==0:
+				qblock_size = np.concatenate((qblock_size, runtime['qblock_size']))
 			Nbins.append(runtime['Nbin_chunksum_qblock'])
 			t_mean.append(runtime['runtime_chunksum_qblock_sec_mean'])
 			t_std.append(runtime['runtime_chunksum_qblock_sec_std'])
 			runtime_per_batch.append(runtime['runtime_perbatch_sec_mean'])
-
+			
 	Nbins_dict = {index: Nbin for index, Nbin in enumerate(Nbins)}
 	sorted_indices = sorted(Nbins_dict, key=Nbins_dict.get)
 	Nbins_sorted = [Nbins_dict[i] for i in sorted_indices]
@@ -165,6 +177,34 @@ def get_runtime_chunksum_qblock(path_to_file: str, output_path: str):
 	}
 	with open(f'{output_path}/chunksum_qblock_runtime_vs_Nbins.json', 'w') as f:
 		json.dump(output_data, f)
+	##
+	try:
+		## plot distribution of the qblock sizes
+		plt.figure(figsize=(12, 8))
+		hep.style.use("CMS")
+		mean_x = np.round(np.mean(qblock_size['x']), 1)
+		mean_y = np.round(np.mean(qblock_size['y']),1)
+		mean_z = np.round(np.mean(qblock_size['z']),1)
+		max_x = np.max(qblock_size['x'])
+		max_y = np.max(qblock_size['y'])
+		max_z = np.max(qblock_size['z'])
+
+		plt.hist(qblock_size['x'], bins=np.arange(np.min(qblock_size['x']), np.max(qblock_size['x']), 1), alpha=0.7, histtype='step', color='blue')
+		plt.hist(qblock_size['y'], bins=np.arange(np.min(qblock_size['y']), np.max(qblock_size['y']), 1), alpha=0.7, histtype='step', color='green')
+		plt.hist(qblock_size['z'], bins=np.arange(np.min(qblock_size['z']), np.max(qblock_size['z']), 1), alpha=0.7, histtype='step', color='red')
+		plt.xlabel('Qblock size', fontsize=20)
+		plt.ylabel('#', fontsize=20)
+		plt.title('Distribution of Qblock sizes', fontsize=20)
+		plt.xticks(fontsize=15)
+		plt.yticks(fontsize=15)
+		plt.legend([f'x size, mean = {mean_x}, max = {max_x}', f'y size, mean = {mean_y}, max = {max_y}', f'z size, mean = {mean_z}, max = {max_z}'], fontsize=15)
+		plt.grid(True)
+		plt.tight_layout()
+		plt.savefig(f'{output_path}/distribution_qblock_sizes.png')
+		plt.close()
+	except:
+		pass
+	# sys.exit()
 	# plot
 	plot_chunksum_runtime_vs_Nbins(Nbins=Nbins_sorted, t_mean=t_mean_sorted, t_std=t_std_sorted, output_path=output_path, xlabel='Number of bins in chunksum_qblock', ylabel='Runtime (sec)', title='Chunksum_qblock Runtime vs Number of bins', filename='chunksum_qblock_runtime_vs_Nbins.png')
 
