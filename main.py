@@ -465,10 +465,11 @@ def separation_by_time():
 		plt.close()
 	
 def runtime_chunksum():
-	path_to_file = '/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/CHUNKSUM_EVAL/'
+	path_to_file = '/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/CHUNKSUM_EVAL/from_Nov18_2025/chunksum_qblock_runtime_vs_binsize'
+	# path_to_file = '/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/CHUNKSUM_EVAL/from_Nov18_2025/data_for_dist_Nqblocks'
 	# chunksum_eval.get_runtime_chunksum_i(path_to_file=path_to_file, output_path='tests/')
 
-	chunksum_eval.get_runtime_chunksum_qblock(path_to_file=path_to_file, output_path='tests/')
+	chunksum_eval.get_runtime_chunksum_qblock(path_to_file=path_to_file, output_path='tests/tmp')
 	# chunksum_eval.get_runtime_chunksum_readout(path_to_file=path_to_file, output_path='../tests/')
 
 if __name__ == '__main__':
