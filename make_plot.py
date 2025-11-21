@@ -56,8 +56,8 @@ def overlay_plots_mem(*args, title='', xlabel='', ylabel='', output_file='overla
 
 def benchmark_peak_memory_nodynamic_chunking_and_batching(path_to_file: str=''):
 	map_key = {
-		'nbchunk': 'nbchunk',
-		'nbchunk_conv': 'nbchunk_conv',
+		'nbchunk': 'raster batch',
+		'nbchunk_conv': 'conv batch',
 	}
 	data = load_json(path_to_file) ## load peakmem_vs_Nsegments_nodynamic_chunking_batching.json
 	colors = ['red', 'green', 'black', 'blue', 'maroon', 'orange', 'purple', 'brown', 'pink', 'gray', 'olive', 'cyan']
@@ -101,8 +101,8 @@ def overlay_plots_runtime(*args, title, xlabel, ylabel,output_file=''):
 
 def benchmark_runtime(path_to_file: str=''):
 	map_key = {
-		'nbchunk': 'nbchunk',
-		'nbchunk_conv': 'nbchunk_conv',
+		'nbchunk': 'raster batch',
+		'nbchunk_conv': 'conv batch',
 	}
 	data = load_json(path_to_file) ## load runtime_vs_Nsegments.json
 	list_of_tuple_data = []
@@ -233,15 +233,15 @@ def runtime_chunksum(path_to_file: str=''):
 	plot_chunksum_runtime_vs_Nbins(Nbins, t_mean, t_std, output_path=output_path, xlabel=xlabel, ylabel=ylabel, title=title)
 
 def plot(peak_mem_tuple, runtime_tuple):
-	map_key_color = {'nbchunk :  100, nbchunk_conv :  10': 'red',
-					'nbchunk :  100, nbchunk_conv :  50': 'green',
-					'nbchunk :  100, nbchunk_conv :  100' : 'black',
-					'nbchunk :  300, nbchunk_conv :  50' : 'blue'
+	map_key_color = {'raster batch :  100, conv batch :  10': 'red',
+					'raster batch :  100, conv batch :  50': 'green',
+					'raster batch :  100, conv batch :  100' : 'black',
+					'raster batch :  300, conv batch :  50' : 'blue'
 					}
-	map_key_marker = {'nbchunk :  100, nbchunk_conv :  10': '.',
-					'nbchunk :  100, nbchunk_conv :  50': 'p',
-					'nbchunk :  100, nbchunk_conv :  100' : '<',
-					'nbchunk :  300, nbchunk_conv :  50' : '*'
+	map_key_marker = {'raster batch :  100, conv batch :  10': '.',
+					'raster batch :  100, conv batch :  50': 'p',
+					'raster batch :  100, conv batch :  100' : '<',
+					'raster batch :  300, conv batch :  50' : '*'
 					}
 	hep.style.use("CMS")
 	filled_markers = ['.', 'p', 'v', '*', '^', '<', '8', 's', 'p', 'h', 'H', 'D', 'd', 'P', 'X']
@@ -254,7 +254,7 @@ def plot(peak_mem_tuple, runtime_tuple):
 	# ax1.set_xlabel('N segments', fontsize=24)
 	ax1.set_ylabel('Peak memory consumption (MB)', fontsize=24)
 	ax1.set_ylim([0, 25000])
-	ax1.legend(loc='best')
+	ax1.legend(loc='upper right')
 	ax1.grid(True, alpha=0.3)
 
 	# Bottom plot
@@ -266,7 +266,7 @@ def plot(peak_mem_tuple, runtime_tuple):
 	ax2.set_xlabel('Track segments', fontsize=24)
 	ax2.set_ylabel('Runtime per batch(sec)', fontsize=24)
 	# ax2.set_ylim([0, 25])
-	ax2.legend(loc='best')
+	ax2.legend(loc='upper left')
 	ax2.grid(True, alpha=0.3)
 
 	# plt.tight_layout()
