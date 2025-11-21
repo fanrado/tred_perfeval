@@ -32,11 +32,11 @@ def overlay_plots_mem(*args, title='', xlabel='', ylabel='', output_file='overla
 	plt.figure(figsize=(12,12))
 	hep.style.use("CMS") 
 	i = 1
-	filled_markers = ['.', 'o', 'v', '*', '^', '<', '8', 's', 'p', 'h', 'H', 'D', 'd', 'P', 'X']
+	filled_markers = ['.', 'p', 'v', '*', '^', '<', '8', 's', 'p', 'h', 'H', 'D', 'd', 'P', 'X']
 	j = 0
 	for x_data, y_data, label, color in args:
 		if nodynChunkBatch:
-			plt.scatter(x_data, y_data, label=label, color=color, alpha=0.4, s=100, marker=filled_markers[i])
+			plt.scatter(x_data, y_data, label=label, color=color, alpha=0.4, s=100, marker=filled_markers[j])
 		else:
 			plt.scatter(x_data, y_data, label=label, color=color, alpha=0.4, s=100, marker=filled_markers[j])
 		i += 2
@@ -44,7 +44,7 @@ def overlay_plots_mem(*args, title='', xlabel='', ylabel='', output_file='overla
 	plt.xlabel(xlabel, fontsize=24)
 	plt.ylabel(ylabel, fontsize=24)
 	plt.title(title, fontsize=24)
-	# plt.ylim([-500, 25000])
+	plt.ylim([-500, 20000])
 	plt.xticks(fontsize=24)
 	plt.yticks(fontsize=24)
 	
@@ -56,30 +56,37 @@ def overlay_plots_mem(*args, title='', xlabel='', ylabel='', output_file='overla
 
 def benchmark_peak_memory_nodynamic_chunking_and_batching(path_to_file: str=''):
 	map_key = {
-		'nbchunk': 'chunk size',
-		'nbchunk_conv': 'convolution chunk size',
+		'nbchunk': 'nbchunk',
+		'nbchunk_conv': 'nbchunk_conv',
 	}
 	data = load_json(path_to_file) ## load peakmem_vs_Nsegments_nodynamic_chunking_batching.json
-	colors = ['red', 'green', 'black', 'purple', 'blue', 'maroon']
+	colors = ['red', 'green', 'black', 'blue', 'maroon', 'orange', 'purple', 'brown', 'pink', 'gray', 'olive', 'cyan']
 	list_of_tuple_data = []
+	j = 0
 	for i, key in enumerate(data.keys()):
 		x_data = np.array(data[key]['N_segments'])
 		y_data = np.array(data[key]['peak_memory_perbatch'])
-		print(key)
 		tmp_label = key.split(',')
 		label = f'{map_key['nbchunk']} : {tmp_label[0].split(':')[1]}, {map_key['nbchunk_conv']} : {tmp_label[1].split(':')[1]}'
-		color = colors[i]
+		print(label,'\t', f'{map_key['nbchunk']} : 100, {map_key['nbchunk_conv']} : 10')
+		# if ('300' in tmp_label[0]) or (label==f'{map_key['nbchunk']} :  100, {map_key['nbchunk_conv']} :  10'):
+		# 	continue
+		if (label==f'{map_key['nbchunk']} :  10, {map_key['nbchunk_conv']} :  10') or (label==f'{map_key['nbchunk']} :  300, {map_key['nbchunk_conv']} :  10') or (label==f'{map_key['nbchunk']} :  50, {map_key['nbchunk_conv']} :  50'):
+			continue
+		color = colors[j]
 		list_of_tuple_data.append((x_data, y_data, label, color))
+		j += 1
 	output_file = path_to_file.replace('.json', '.png')
 	overlay_plots_mem(*list_of_tuple_data, title='Peak Memory as a function of N_segments', xlabel='N segments', ylabel='Peak Memory (MB)', output_file=output_file, nodynChunkBatch=True)
+	return list_of_tuple_data
 
 ## Runtime evaluation
 def overlay_plots_runtime(*args, title, xlabel, ylabel,output_file=''):
 	plt.figure(figsize=(12, 9))
 	hep.style.use("CMS") 
-	filled_markers = ['.', '<', '+', '*', '^', '<', '8', 's', 'p', 'h', 'H', 'D', 'd', 'P', 'X']
+	filled_markers = ['.', 'p', 'v', '*', '^', '<', '8', 's', 'p', 'h', 'H', 'D', 'd', 'P', 'X']
 	for i,(x_data, y_data, label, color) in enumerate(args):
-		plt.scatter(x_data, y_data,label=label, color=color, alpha=0.7, marker=filled_markers[i], s=100)
+		plt.scatter(x_data, y_data,label=label, color=color, alpha=0.5, marker=filled_markers[i], s=100)
 	plt.xlabel(xlabel, fontsize=24)
 	plt.ylabel(ylabel, fontsize=24)
 	plt.title(title, fontsize=24)
@@ -94,21 +101,26 @@ def overlay_plots_runtime(*args, title, xlabel, ylabel,output_file=''):
 
 def benchmark_runtime(path_to_file: str=''):
 	map_key = {
-		'nbchunk': 'chunk size',
-		'nbchunk_conv': 'convolution chunk size',
+		'nbchunk': 'nbchunk',
+		'nbchunk_conv': 'nbchunk_conv',
 	}
 	data = load_json(path_to_file) ## load runtime_vs_Nsegments.json
 	list_of_tuple_data = []
-	colors 					= ['maroon', 'green', 'black', 'purple', 'red', 'blue', 'orange', 'brown', 'pink', 'gray', 'olive', 'cyan']
+	colors 					= ['red', 'green', 'black', 'blue', 'maroon', 'orange', 'purple', 'brown', 'pink', 'gray', 'olive', 'cyan']
+	j = 0
 	for i, key in enumerate(data.keys()):
 		x_data = np.array(data[key]['N_segments'])
 		y_data = np.array(data[key]['runtimes_perbatch'])
 		tmp_label = key.split(',')
 		label = f'{map_key['nbchunk']} : {tmp_label[0].split(':')[1]}, {map_key['nbchunk_conv']} : {tmp_label[1].split(':')[1]}'
-		color = colors[i]
+		if (label==f'{map_key['nbchunk']} :  10, {map_key['nbchunk_conv']} :  10') or (label==f'{map_key['nbchunk']} :  300, {map_key['nbchunk_conv']} :  10') or (label==f'{map_key['nbchunk']} :  50, {map_key['nbchunk_conv']} :  50') or (label==f'{map_key['nbchunk']} :  300, {map_key['nbchunk_conv']} :  100') or (label==f'{map_key['nbchunk']} :  300, {map_key['nbchunk_conv']} :  150'):
+			continue
+		color = colors[j]
 		list_of_tuple_data.append((x_data, y_data, label, color))
+		j += 1
 	output_file = path_to_file.replace('.json', '.png')
 	overlay_plots_runtime(*list_of_tuple_data, title='Runtime vs N_segments', xlabel='N segments', ylabel='Runtime (sec)', output_file=output_file)
+	return list_of_tuple_data
 
 def runtimeshare_majorOp(path_to_file: str=''):
 	data = load_json(path_to_file) ## load runtime_majorOps_batchsize8192_NBCHUNK100_NBCHUNKCONV50.json
@@ -220,14 +232,57 @@ def runtime_chunksum(path_to_file: str=''):
 	output_path = path_to_file.replace('.json', '.png')
 	plot_chunksum_runtime_vs_Nbins(Nbins, t_mean, t_std, output_path=output_path, xlabel=xlabel, ylabel=ylabel, title=title)
 
+def plot(peak_mem_tuple, runtime_tuple):
+	map_key_color = {'nbchunk :  100, nbchunk_conv :  10': 'red',
+					'nbchunk :  100, nbchunk_conv :  50': 'green',
+					'nbchunk :  100, nbchunk_conv :  100' : 'black',
+					'nbchunk :  300, nbchunk_conv :  50' : 'blue'
+					}
+	map_key_marker = {'nbchunk :  100, nbchunk_conv :  10': '.',
+					'nbchunk :  100, nbchunk_conv :  50': 'p',
+					'nbchunk :  100, nbchunk_conv :  100' : '<',
+					'nbchunk :  300, nbchunk_conv :  50' : '*'
+					}
+	hep.style.use("CMS")
+	filled_markers = ['.', 'p', 'v', '*', '^', '<', '8', 's', 'p', 'h', 'H', 'D', 'd', 'P', 'X']
+	fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 12), sharex=True, gridspec_kw={'hspace': 0.05}, constrained_layout=True)
+	# Top plot
+	for i, (x_data, y_data, label, color) in enumerate(peak_mem_tuple):
+		color = map_key_color[label]
+		marker = map_key_marker[label]
+		ax1.scatter(x_data, y_data, label=label, color=color, alpha=0.5, s=100, marker=marker)
+	# ax1.set_xlabel('N segments', fontsize=24)
+	ax1.set_ylabel('Peak memory consumption (MB)', fontsize=24)
+	ax1.set_ylim([0, 25000])
+	ax1.legend(loc='best')
+	ax1.grid(True, alpha=0.3)
+
+	# Bottom plot
+	for i, (x_data, y_data, label, color) in enumerate(runtime_tuple):
+		color = map_key_color[label]
+		marker = map_key_marker[label]
+		ax2.scatter(x_data, y_data, label=label, color=color, alpha=0.5, s=100, marker=marker)
+	# ax2.set_xlabel('N segments', fontsize=24)
+	ax2.set_xlabel('Track segments', fontsize=24)
+	ax2.set_ylabel('Runtime per batch(sec)', fontsize=24)
+	# ax2.set_ylim([0, 25])
+	ax2.legend(loc='best')
+	ax2.grid(True, alpha=0.3)
+
+	# plt.tight_layout()
+	plt.savefig('/home/rrazakami/work/ND-LAr/starting_over/plots4paper/runtime_memoryConsumption.png', dpi=300)
+
 if __name__ == "__main__":
 	## Peak memory evaluation without dynamic chunking and batching
-	# input_path_peakmem = 'data4plots/peakmem_vs_Nsegments_nodynamic_chunking_batching.json'  ## path to peakmem_vs_Nsegments_nodynamic_chunking_batching.json
-	# benchmark_peak_memory_nodynamic_chunking_and_batching(input_path_peakmem)
+	input_path_peakmem = '/home/rrazakami/work/ND-LAr/starting_over/plots4paper/gpu_maxmemory_consumption_event1003/peakmem_vs_Nsegments_nodynamic_chunking_batching.json'  ## path to peakmem_vs_Nsegments_nodynamic_chunking_batching.json
+	peak_mem_tuple = benchmark_peak_memory_nodynamic_chunking_and_batching(input_path_peakmem)
 
 	## Runtime evaluation
-	# input_path_runtime = 'data4plots/runtime_vs_Nsegments_all.json'  ## path to runtime_vs_Nsegments.json
-	# benchmark_runtime(input_path_runtime)
+	input_path_runtime = '/home/rrazakami/work/ND-LAr/starting_over/plots4paper/runtime_event1003/runtime_vs_Nsegments.json'  ## path to runtime_vs_Nsegments.json
+	runtime_tuple = benchmark_runtime(input_path_runtime)
+
+	# ## Overlay peak memory and runtime plots with shared x-axis
+	plot(peak_mem_tuple, runtime_tuple)
 
 	# input_path_runtime = 'data4plots/convo_8x8x2560/runtime_majorOps_batchsize8192_NBCHUNK100_NBCHUNKCONV50.json'  ## path to runtime_majorOps_batchsize8192_NBCHUNK100_NBCHUNKCONV50.json
 	# runtimeshare_majorOp(input_path_runtime)
@@ -237,7 +292,7 @@ if __name__ == "__main__":
 	# effq_evaluation(path_to_file)
 
 	## Chunksum runtime evaluation
-	# path_to_file = 'data4plots/chunksum_i_runtime_vs_Nbins.json'
-	path_to_file = 'tests/tmp/chunksum_qblock_runtime_vs_Nbins.json'
-	runtime_chunksum(path_to_file)
+	# # path_to_file = 'data4plots/chunksum_i_runtime_vs_Nbins.json'
+	# path_to_file = 'tests/tmp/chunksum_qblock_runtime_vs_Nbins.json'
+	# runtime_chunksum(path_to_file)
 	
