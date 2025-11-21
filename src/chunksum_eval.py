@@ -1,6 +1,9 @@
 import os, sys, json
 import numpy as np
 import matplotlib.pyplot as plt
+
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+
 import mplhep as hep
 
 def load_json(fname):
@@ -129,20 +132,42 @@ def get_chunksum_runtime(data_json: dict, output_path: str='../tests'):
 	return Runtime_summary
 
 def plot_chunksum_runtime_vs_Nbins(Nbins: list, t_mean: list, t_std: list, output_path: str, xlabel: str='Number of bins', ylabel: str='Runtime (sec)', title: str='Chunksum Runtime vs Number of bins', filename: str='chunksum_runtime_vs_Nbins.png'):
-	plt.figure(figsize=(10, 8))
+	# plt.figure(figsize=(10, 8))
+	# hep.style.use("CMS") 
+	# # plt.errorbar(Nbins, t_mean, yerr=t_std, fmt='o--', ecolor='r', capsize=5, label=r'Mean $\pm stdev$')
+	# plt.errorbar(Nbins, t_mean, yerr=None, fmt='o--', ecolor='r', capsize=5, label=r'Average of runtime per batch')
+	# # plt.plot(Nbins_sorted, t_mean_sorted, '*--', label=r'Mean $\pm stdev$')
+	# plt.xlabel(xlabel, fontsize=20)
+	# plt.ylabel(ylabel, fontsize=20)
+	# # plt.xlim([100, 500])
+	# plt.title(title, fontsize=20)
+	# plt.xticks(fontsize=15)
+	# plt.yticks(fontsize=15)
+	# plt.legend(fontsize=15)
+	# plt.grid(True)
+	# plt.tight_layout()
+	# plt.savefig(f'{output_path}/{filename}')
+	# plt.close()
+	fig, ax = plt.subplots(figsize=(10, 8), constrained_layout=True)
 	hep.style.use("CMS") 
 	# plt.errorbar(Nbins, t_mean, yerr=t_std, fmt='o--', ecolor='r', capsize=5, label=r'Mean $\pm stdev$')
-	plt.errorbar(Nbins, t_mean, yerr=None, fmt='o--', ecolor='r', capsize=5, label=r'Average of runtime per batch')
+	ax.errorbar(Nbins, t_mean, yerr=None, fmt='o--', ecolor='r', capsize=5, label=r'Average of runtime per batch')
 	# plt.plot(Nbins_sorted, t_mean_sorted, '*--', label=r'Mean $\pm stdev$')
-	plt.xlabel(xlabel, fontsize=20)
-	plt.ylabel(ylabel, fontsize=20)
-	# plt.xlim([100, 500])
-	plt.title(title, fontsize=20)
-	plt.xticks(fontsize=15)
-	plt.yticks(fontsize=15)
-	plt.legend(fontsize=15)
-	plt.grid(True)
-	plt.tight_layout()
+	ax.set_xlabel(xlabel, fontsize=20)
+	ax.set_ylabel(ylabel, fontsize=20)
+	ax.set_ylim(0, 3)
+	ax.set_title(title, fontsize=20)
+	ax.tick_params(axis='x', labelsize=20)
+	ax.tick_params(axis='y', labelsize=20)
+	ax.legend(fontsize=20)
+	ax.grid(True)
+	#
+	zoom_ax = inset_axes(ax, width="40%", height="40%", loc="upper left", borderpad=2)
+	zoom_ax.errorbar(Nbins, t_mean, yerr=None, fmt='o--', ecolor='r', capsize=5)
+	zoom_ax.set_xlim(-1, 129)
+	zoom_ax.set_ylim(0, 0.5)
+	zoom_ax.set_xticks([0, 32, 64, 96, 128])
+	# plt.tight_layout()
 	plt.savefig(f'{output_path}/{filename}')
 	plt.close()
 
