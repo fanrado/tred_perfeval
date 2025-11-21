@@ -77,8 +77,9 @@ def memory_evaluation():
 	# Peak memory usage ----
 	# input_dir = '/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/MEMORY_EVAL/preliminary/no_dynBatchChunk/benchmark_plot'
 	# input_dir = '/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/MEMORY_EVAL/Benchmark_November14_2025/to_use'
-	input_dir = '/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/MEMORY_EVAL/MemCons_5x5_FR_nodynChunkBatch/convo_8x8x2560/to_use'
-	
+	# input_dir = '/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/MEMORY_EVAL/MemCons_5x5_FR_nodynChunkBatch/convo_8x8x2560/to_use'
+	input_dir = '/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/MEMORY_EVAL/'	
+
 	peakmem_eval.benchmark_peak_memory_nodynamic_chunking_and_batching(input_path=input_dir)
 	# input_dir = "/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/MEMORY_EVAL/benchmark_plot_dynChunkBatch/files_plot"
 	# input_dir = '/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/MEMORY_EVAL/benchmark_plot_dynChunkBatch/files_plot'
@@ -90,23 +91,24 @@ def runtime_evaluation():
 	## Runtime evaluation ----
 	## PIECHART RUNTIME for one event
 
-	input_dir = '/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/RUNTIME_EVAL/Runtime_5x5_FR_convo8x8x2560/'
+	# input_dir = '/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/RUNTIME_EVAL/Runtime_5x5_FR_convo8x8x2560/'
+	input_dir = '/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/RUNTIME_EVAL/Runtime_5x5_FR_convo8x8x2560_event1003'
 	# input_dir = '/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/RUNTIME_EVAL/preliminary/benchmark_plot/new_benchmark_plot'
 	# input_subdir = 'runon_wcgpu1'
 	input_subdir = ''
-	filename = 'runtime_batchsize8192_NBCHUNK100_NBCHUNKCONV50.json'
+	filename = 'runtime_batchsize8192_NBCHUNK100_NBCHUNKCONV100.json'
 	input_file = '/'.join([input_dir, input_subdir, filename])
 	data = load_json(input_file=input_file)
 	runtime_majorOps = runtime_eval.get_runtime_majorOperations(data=data)
 	# save the major ops runtime data in a json
-	output_file_json = '/'.join([input_dir, input_subdir, 'runtime_majorOps_batchsize8192_NBCHUNK100_NBCHUNKCONV50_details.json'])
+	output_file_json = '/'.join([input_dir, input_subdir, 'runtime_majorOps_batchsize8192_NBCHUNK100_NBCHUNKCONV100_details.json'])
 	save_json(output_file=output_file_json, data=runtime_majorOps)
 	runtime_eval.runtimeshare_majorOp_details(organized_data=runtime_majorOps, output_file='/'.join([input_dir, input_subdir, 'runtime_share_majorOps_details.png']))
 
 	## Overlay of the runtime for different batch schemes
 	# input_dir = '/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/RUNTIME_EVAL/preliminary/benchmark_plot/new_benchmark_plot'
-	# input_dir = '/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/RUNTIME_EVAL/Runtime_5x5_FR_convo8x8x2560/nbchunk_conv_10'
-	# runtime_eval.benchmark_runtime(input_path=input_dir)
+	input_dir = '/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/RUNTIME_EVAL/Runtime_5x5_FR_convo8x8x2560_event1003'
+	runtime_eval.benchmark_runtime(input_path=input_dir)
 
 def effq_accuracy_eval_cuton_drifttime():
 	# root_path = "/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/ACC_EFFQ/cut_on_drifttime_30_100_nocut_event1003"
