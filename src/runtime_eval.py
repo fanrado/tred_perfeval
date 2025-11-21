@@ -155,8 +155,15 @@ def get_runtime_majorOperations(data: dict):
 	chunksum_readout 	= []
 	concat_readout 		= []
 	formingBlock_readout_current = []
+
+	## get event_id, N_segments, N_qblock
+	event_ids 			= []
+	N_segments 			= []
+	N_qblocks 			= []
+	conv_chunksumQblock_runtime_perbatch = []
 	## Process the TPC data
 	for keytpc, tpcdata in data.items():
+		# print(tpcdata)
 		# TPC level
 		for keybatch, batch_data in tpcdata.items():
 			## Batch level
@@ -164,6 +171,11 @@ def get_runtime_majorOperations(data: dict):
 			if not isinstance(batch_data, dict):
 				continue
 			for key, value in batch_data.items():
+				## get event_id, N_segments, N_qblock
+				event_ids.append(value['event_id'])
+				N_segments.append(value['N_segments'])
+				N_qblocks.append(value['N_qblock'])
+				conv_chunksumQblock_runtime = 0.0
 				# replace _MB with _sec
 				each_operation_runtime = value['each_operation_sec'] ## replace each_operation_MB with each_operation_sec once the data is ready
 				recombination.append(each_operation_runtime['recomb_sec'])
@@ -177,6 +189,9 @@ def get_runtime_majorOperations(data: dict):
 					chunking_conv['rasterize'].append(chunkdata['raster_sec'])
 					chunking_conv['chunksum_qblock'].append(chunkdata['chunksum_qblock_sec'])
 					chunking_conv['sumcurrent'].append(chunkdata['sumcurrent_sec'])
+					##
+					conv_chunksumQblock_runtime += chunkdata['chunksum_qblock_sec'] ## adding the runtime of chunksum_qblock
+					#
 					conv_data = chunkdata['conv_sec']
 					for keyconv, valconv in conv_data.items():
 						if not isinstance(valconv, dict):
@@ -185,6 +200,9 @@ def get_runtime_majorOperations(data: dict):
 						for key1, value1 in valconv.items():
 							chunking_conv['conv_conv'].append(value1['conv_time'])
 							chunking_conv['conv_chunksum_i'].append(value1['chunksum_i_time'])
+							##
+							conv_chunksumQblock_runtime += value1['conv_time'] ## adding the runtime of conv
+				conv_chunksumQblock_runtime_perbatch.append(conv_chunksumQblock_runtime)
 	organized_data['batch_size'] 					= batch_size
 	organized_data['nbchunk'] 						= nbchunk
 	organized_data['nbchunk_conv'] 					= nbchunk_conv
@@ -204,6 +222,7 @@ def get_runtime_majorOperations(data: dict):
 	organized_data['chunksum_readout'] 				= chunksum_readout
 	organized_data['concat_readout'] 				= concat_readout
 	organized_data['formingBlock_readout_current'] 	= formingBlock_readout_current
+	# print(organized_data)
 
 	# ## Calculate major operations runtime
 	# Electronic_readout = np.sum(organized_data['chunksum_readout']) + np.sum(organized_data['concat_readout']) + np.sum(organized_data['formingBlock_readout_current'])
@@ -237,6 +256,23 @@ def get_runtime_majorOperations(data: dict):
 		'Rasterization' : Rasterization,
 		'Recombination_attenuation_and_drift' : Recombination_attenuation_and_drift
 	}
+
+	### Get runtime vs N_segments and runtime vs N_qblock data
+	## Total runtime = convolution + chunksum(qblock)
+	plt.figure(figsize=(10, 8))
+	hep.style.use("ROOT")
+	plt.scatter(N_segments, conv_chunksumQblock_runtime_perbatch, label='convolution \n+ block-sparse binning (qblock)', color='blue', alpha=0.7, marker='o', s=50)
+	# plt.xlabel('N segments', fontsize=24)
+	plt.xlabel('Track segments', fontsize=24)
+	plt.ylabel('Runtime per batch (sec)', fontsize=24)
+	plt.xticks(fontsize=24)
+	plt.yticks([i*2 for i in range(6)],fontsize=24)
+	plt.legend(fontsize=24)
+	plt.grid(True)
+	plt.tight_layout()
+	plt.savefig('/home/rrazakami/work/ND-LAr/starting_over/OUTPUT_EVAL/RUNTIME_EVAL/runtime_conv_chunksumQblocks.png')
+	plt.close()
+
 	return major_operations_runtime
 
 def runtimeshare_majorOp(organized_data: dict, output_file=''):
