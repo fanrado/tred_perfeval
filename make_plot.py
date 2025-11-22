@@ -44,7 +44,8 @@ def overlay_plots_mem(*args, title='', xlabel='', ylabel='', output_file='overla
 	plt.xlabel(xlabel, fontsize=24)
 	plt.ylabel(ylabel, fontsize=24)
 	plt.title(title, fontsize=24)
-	plt.ylim([-500, 20000])
+	# plt.ylim([-500, 20000])
+	plt.ylim([-500, 7000])
 	plt.xticks(fontsize=24)
 	plt.yticks(fontsize=24)
 	
@@ -71,7 +72,7 @@ def benchmark_peak_memory_nodynamic_chunking_and_batching(path_to_file: str=''):
 		print(label,'\t', f'{map_key['nbchunk']} : 100, {map_key['nbchunk_conv']} : 10')
 		# if ('300' in tmp_label[0]) or (label==f'{map_key['nbchunk']} :  100, {map_key['nbchunk_conv']} :  10'):
 		# 	continue
-		if (label==f'{map_key['nbchunk']} :  10, {map_key['nbchunk_conv']} :  10') or (label==f'{map_key['nbchunk']} :  300, {map_key['nbchunk_conv']} :  10') or (label==f'{map_key['nbchunk']} :  50, {map_key['nbchunk_conv']} :  50'):
+		if (label==f'{map_key['nbchunk']} :  10, {map_key['nbchunk_conv']} :  10') or (label==f'{map_key['nbchunk']} :  300, {map_key['nbchunk_conv']} :  10') or (label==f'{map_key['nbchunk']} :  50, {map_key['nbchunk_conv']} :  50') or (label==f'{map_key['nbchunk']} :  300, {map_key['nbchunk_conv']} :  100'):
 			continue
 		color = colors[j]
 		list_of_tuple_data.append((x_data, y_data, label, color))
@@ -87,14 +88,14 @@ def overlay_plots_runtime(*args, title, xlabel, ylabel,output_file=''):
 	filled_markers = ['.', 'p', 'v', '*', '^', '<', '8', 's', 'p', 'h', 'H', 'D', 'd', 'P', 'X']
 	for i,(x_data, y_data, label, color) in enumerate(args):
 		plt.scatter(x_data, y_data,label=label, color=color, alpha=0.5, marker=filled_markers[i], s=100)
-	plt.xlabel(xlabel, fontsize=24)
-	plt.ylabel(ylabel, fontsize=24)
-	plt.title(title, fontsize=24)
+	plt.xlabel(xlabel, fontsize=26)
+	plt.ylabel(ylabel, fontsize=26)
+	plt.title(title, fontsize=26)
 	# plt.ylim([-1, 8])
-	plt.xticks(fontsize=24)
-	plt.yticks(fontsize=24)
+	plt.xticks(fontsize=26)
+	plt.yticks(fontsize=26)
 	plt.tight_layout()
-	plt.legend(loc='upper left', fontsize=24)
+	plt.legend(loc='upper left', fontsize=26)
 	plt.grid(True)
 	plt.savefig(output_file, dpi=300)
 	plt.close()
@@ -113,7 +114,7 @@ def benchmark_runtime(path_to_file: str=''):
 		y_data = np.array(data[key]['runtimes_perbatch'])
 		tmp_label = key.split(',')
 		label = f'{map_key['nbchunk']} : {tmp_label[0].split(':')[1]}, {map_key['nbchunk_conv']} : {tmp_label[1].split(':')[1]}'
-		if (label==f'{map_key['nbchunk']} :  10, {map_key['nbchunk_conv']} :  10') or (label==f'{map_key['nbchunk']} :  300, {map_key['nbchunk_conv']} :  10') or (label==f'{map_key['nbchunk']} :  50, {map_key['nbchunk_conv']} :  50') or (label==f'{map_key['nbchunk']} :  300, {map_key['nbchunk_conv']} :  100') or (label==f'{map_key['nbchunk']} :  300, {map_key['nbchunk_conv']} :  150'):
+		if (label==f'{map_key['nbchunk']} :  10, {map_key['nbchunk_conv']} :  10') or (label==f'{map_key['nbchunk']} :  300, {map_key['nbchunk_conv']} :  10') or (label==f'{map_key['nbchunk']} :  50, {map_key['nbchunk_conv']} :  50') or (label==f'{map_key['nbchunk']} :  300, {map_key['nbchunk_conv']} :  100') or (label==f'{map_key['nbchunk']} :  300, {map_key['nbchunk_conv']} :  150') or (label==f'{map_key['nbchunk']} :  300, {map_key['nbchunk_conv']} :  100'):
 			continue
 		color = colors[j]
 		list_of_tuple_data.append((x_data, y_data, label, color))
@@ -124,27 +125,56 @@ def benchmark_runtime(path_to_file: str=''):
 
 def runtimeshare_majorOp(path_to_file: str=''):
 	data = load_json(path_to_file) ## load runtime_majorOps_batchsize8192_NBCHUNK100_NBCHUNKCONV50.json
+	# Electronic_readout = data['Electronic_readout']
+	# Induced_current_calculation = data['Induced_current_calculation']
+	# Rasterization_of_ionization_charges = data['Rasterization_of_ionization_charges']
+	# Recombination_attenuation_and_drift = data['Recombination_attenuation_and_drift']
+
+	# labels = ['Electronic readout', 'Induced current calculation', 'Rasterization of ionization charges', 'Recombination, attenuation, and drift']
+	# sizes = [Electronic_readout, Induced_current_calculation, Rasterization_of_ionization_charges, Recombination_attenuation_and_drift]
+	# colors = ['#ff9999','#66b3ff','#99ff99','#ffcc99']
+	# explode = (0.05, 0.05, 0.05, 0.05)  # explode all slices slightly
+	# plt.figure(figsize=(12,10))
+	# plt.subplots_adjust(right=0.7)
+	# # hep.style.use("CMS")
+	# wedges, texts, autotexts = plt.pie(sizes, explode=explode, labels=None, colors=colors, autopct='%1.1f%%',
+    #             shadow=True, startangle=140, pctdistance=1.1)
+	# for autotext in autotexts:
+	# 	autotext.set_fontsize(18)
+	# plt.title('Runtime Distribution of Major Operations', fontsize=20)
+	# plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle
+	# plt.legend(wedges, labels, title="Operations", loc="upper right", bbox_to_anchor=(1.1, 0.5), fontsize=18)
+	# plt.tight_layout()
+	# plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+	# plt.savefig(path_to_file.replace('.json', '.png'), bbox_inches='tight')
+	# plt.close()
+
 	Electronic_readout = data['Electronic_readout']
-	Induced_current_calculation = data['Induced_current_calculation']
-	Rasterization_of_ionization_charges = data['Rasterization_of_ionization_charges']
+	# Induced_current_calculation = data['Induced_current_calculation']
+	Convolution = data['Convolution']
+	Chunksum_current = data['Chuksum and current accumulation']
+	# Rasterization_of_ionization_charges = data['Rasterization_of_ionization_charges']
+	Chunksum_qblock = data['Chunksum on charge blocks']
+	Rasterization = data['Rasterization']
 	Recombination_attenuation_and_drift = data['Recombination_attenuation_and_drift']
 
-	labels = ['Electronic readout', 'Induced current calculation', 'Rasterization of ionization charges', 'Recombination, attenuation, and drift']
-	sizes = [Electronic_readout, Induced_current_calculation, Rasterization_of_ionization_charges, Recombination_attenuation_and_drift]
-	colors = ['#ff9999','#66b3ff','#99ff99','#ffcc99']
-	explode = (0.05, 0.05, 0.05, 0.05)  # explode all slices slightly
+	labels = ['Electronic readout', 'Convolution', 'Chunksum current and accumulation','Chunksum of charge blocks', 'Rasterization', 'Recombination, attenuation, and drift']
+	sizes = [Electronic_readout, Convolution, Chunksum_current, Chunksum_qblock, Rasterization, Recombination_attenuation_and_drift]
+	colors = ['#ff9999','#66b3ff','#99ff99',"#e7c907", "#036515", "#8B005A"]
+	explode = (0.05, 0.05, 0.05, 0.05, 0.05, 0.05)  # explode all slices slightly
 	plt.figure(figsize=(12,10))
+	hep.style.use("CMS")
 	plt.subplots_adjust(right=0.7)
-	# hep.style.use("CMS")
 	wedges, texts, autotexts = plt.pie(sizes, explode=explode, labels=None, colors=colors, autopct='%1.1f%%',
-                shadow=True, startangle=140, pctdistance=1.1)
-	for autotext in autotexts:
-		autotext.set_fontsize(18)
-	plt.title('Runtime Distribution of Major Operations', fontsize=20)
+                shadow=True, startangle=140, pctdistance=1.05, radius=0.8, textprops={'fontsize':11, 'weight': 'bold'})
+	for i in range(len(labels)):
+		labels[i] = f'{labels[i]} : {autotexts[i].get_text()}'
+
+	# plt.title('Runtime Distribution of Major Operations', fontsize=20)
 	plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle
-	plt.legend(wedges, labels, title="Operations", loc="upper right", bbox_to_anchor=(1.1, 0.5), fontsize=18)
-	plt.tight_layout()
+	plt.legend(wedges, labels, title="Operations", loc="upper right", bbox_to_anchor=(1.1, 0.8), fontsize=18)
 	plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+	plt.tight_layout()
 	plt.savefig(path_to_file.replace('.json', '.png'), bbox_inches='tight')
 	plt.close()
 
@@ -253,8 +283,9 @@ def plot(peak_mem_tuple, runtime_tuple):
 		ax1.scatter(x_data, y_data, label=label, color=color, alpha=0.5, s=100, marker=marker)
 	# ax1.set_xlabel('N segments', fontsize=24)
 	ax1.set_ylabel('Peak memory consumption (MB)', fontsize=24)
-	ax1.set_ylim([0, 25000])
-	ax1.legend(loc='upper right')
+	# ax1.set_ylim([0, 25000])
+	# ax1.set_ylim([0, 7000])
+	ax1.legend(loc='lower right')
 	ax1.grid(True, alpha=0.3)
 
 	# Bottom plot
@@ -263,7 +294,7 @@ def plot(peak_mem_tuple, runtime_tuple):
 		marker = map_key_marker[label]
 		ax2.scatter(x_data, y_data, label=label, color=color, alpha=0.5, s=100, marker=marker)
 	# ax2.set_xlabel('N segments', fontsize=24)
-	ax2.set_xlabel('Track segments', fontsize=24)
+	ax2.set_xlabel('Number of Track segments', fontsize=24)
 	ax2.set_ylabel('Runtime per batch(sec)', fontsize=24)
 	# ax2.set_ylim([0, 25])
 	ax2.legend(loc='upper left')
@@ -273,19 +304,19 @@ def plot(peak_mem_tuple, runtime_tuple):
 	plt.savefig('/home/rrazakami/work/ND-LAr/starting_over/plots4paper/runtime_memoryConsumption.png', dpi=300)
 
 if __name__ == "__main__":
-	## Peak memory evaluation without dynamic chunking and batching
-	input_path_peakmem = '/home/rrazakami/work/ND-LAr/starting_over/plots4paper/gpu_maxmemory_consumption_event1003/peakmem_vs_Nsegments_nodynamic_chunking_batching.json'  ## path to peakmem_vs_Nsegments_nodynamic_chunking_batching.json
-	peak_mem_tuple = benchmark_peak_memory_nodynamic_chunking_and_batching(input_path_peakmem)
+	# ## Peak memory evaluation without dynamic chunking and batching
+	# input_path_peakmem = '/home/rrazakami/work/ND-LAr/starting_over/plots4paper/gpu_maxmemory_consumption_event1003/peakmem_vs_Nsegments_nodynamic_chunking_batching.json'  ## path to peakmem_vs_Nsegments_nodynamic_chunking_batching.json
+	# peak_mem_tuple = benchmark_peak_memory_nodynamic_chunking_and_batching(input_path_peakmem)
 
-	## Runtime evaluation
-	input_path_runtime = '/home/rrazakami/work/ND-LAr/starting_over/plots4paper/runtime_event1003/runtime_vs_Nsegments.json'  ## path to runtime_vs_Nsegments.json
-	runtime_tuple = benchmark_runtime(input_path_runtime)
+	# ## Runtime evaluation
+	# input_path_runtime = '/home/rrazakami/work/ND-LAr/starting_over/plots4paper/runtime_event1003/runtime_vs_Nsegments.json'  ## path to runtime_vs_Nsegments.json
+	# runtime_tuple = benchmark_runtime(input_path_runtime)
 
 	# ## Overlay peak memory and runtime plots with shared x-axis
-	plot(peak_mem_tuple, runtime_tuple)
+	# plot(peak_mem_tuple, runtime_tuple)
 
-	# input_path_runtime = 'data4plots/convo_8x8x2560/runtime_majorOps_batchsize8192_NBCHUNK100_NBCHUNKCONV50.json'  ## path to runtime_majorOps_batchsize8192_NBCHUNK100_NBCHUNKCONV50.json
-	# runtimeshare_majorOp(input_path_runtime)
+	input_path_runtime = '/home/rrazakami/work/ND-LAr/starting_over/plots4paper/runtime_event1003/runtime_majorOps_batchsize16384_NBCHUNK100_NBCHUNKCONV50_details.json'  ## path to runtime_majorOps_batchsize8192_NBCHUNK100_NBCHUNKCONV50.json
+	runtimeshare_majorOp(input_path_runtime)
 
 	# ## Effective charge evaluation
 	# path_to_file = 'data4plots/effq_accuracy_data_effq_out_nt_10.json'
